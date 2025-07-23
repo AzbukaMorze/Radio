@@ -29,15 +29,15 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Изменено для скролла */
-            overflow-y: auto; /* Добавлено для скролла */
+            align-items: flex-start;
+            overflow-y: auto;
             position: relative;
-            padding: 2rem 0; /* Добавлено для скролла */
+            padding: 2rem 0;
         }
         
         body::before {
             content: '';
-            position: fixed; /* Изменено на fixed для фиксированного фона */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -49,7 +49,7 @@
         
         .container {
             width: 100%;
-            max-width: 1200px; /* Увеличено для растягивания */
+            max-width: 1200px;
             padding: 2rem;
             z-index: 10;
         }
@@ -98,82 +98,154 @@
             gap: 2rem;
             margin-bottom: 2rem;
             flex-wrap: wrap;
-            justify-content: center; /* Центрируем карточки */
+            justify-content: center;
         }
         
-        .radio-card {
-            flex: 1 1 45%; /* Растягиваем и позволяем сжиматься */
-            min-width: 400px; /* Увеличено */
-            min-height: 300px; /* Добавлена высота */
+        .card {
+            flex: 1 1 45%;
+            min-width: 400px;
+            min-height: 300px;
             background: var(--glass);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 2.5rem; /* Увеличено */
+            padding: 2rem;
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.8s ease-out;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Центрируем содержимое */
         }
         
         .card-title {
             display: flex;
             align-items: center;
             gap: 0.8rem;
-            font-size: 1.4rem; /* Увеличено */
-            margin-bottom: 1.5rem; /* Увеличено */
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
             color: var(--accent);
         }
         
         .card-title i {
-            font-size: 1.6rem; /* Увеличено */
+            font-size: 1.6rem;
         }
         
-        .time-card {
-            flex: 1 1 45%; /* Растягиваем и позволяем сжиматься */
-            min-width: 400px; /* Увеличено */
-            min-height: 300px; /* Добавлена высота */
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 2.5rem; /* Увеличено */
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            animation: slideUp 1s ease-out;
+        /* Doodle Board Styles */
+        #doodleCanvas {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            flex-grow: 1;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        
+        .doodle-controls {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            gap: 10px;
+            margin-top: 15px;
         }
         
-        .time-display {
-            font-size: 4rem; /* Увеличено */
+        .doodle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .doodle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .color-picker {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        /* Pomodoro Timer Styles */
+        .pomodoro-display {
+            font-size: 3.5rem;
             font-weight: 700;
             text-align: center;
             font-variant-numeric: tabular-nums;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin: 1rem 0; /* Увеличено */
+            margin: 1rem 0;
         }
         
-        .date-display {
+        .pomodoro-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .pomodoro-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .start-btn {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .pomodoro-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .pomodoro-settings {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        
+        .setting {
             text-align: center;
-            font-size: 1.3rem; /* Увеличено */
+        }
+        
+        .setting label {
+            display: block;
+            margin-bottom: 5px;
             color: #a0aec0;
         }
         
-        .RP-SCRIPT {
-            margin-top: 2rem; /* Увеличено */
+        .setting input {
+            width: 60px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: white;
             text-align: center;
+        }
+        
+        .RP-SCRIPT {
+            margin-top: auto;
+            text-align: center;
+            padding-top: 20px;
         }
 
         .RP-LINK {
             display: inline-block;
-            padding: 14px 28px; /* Увеличено */
+            padding: 14px 28px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             text-decoration: none;
@@ -181,7 +253,7 @@
             border-radius: 30px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(138, 92, 245, 0.3);
-            font-size: 1.1rem; /* Увеличено */
+            font-size: 1.1rem;
         }
 
         .RP-LINK:hover {
@@ -196,7 +268,7 @@
             padding-top: 2rem;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             animation: fadeIn 1.5s ease-out;
-            margin-top: 2rem; /* Добавлено */
+            margin-top: 2rem;
         }
         
         /* Animations */
@@ -224,8 +296,7 @@
         
         /* Responsive */
         @media (max-width: 1024px) {
-            .radio-card,
-            .time-card {
+            .card {
                 min-width: 350px;
             }
         }
@@ -243,14 +314,13 @@
                 font-size: 2.5rem;
             }
             
-            .radio-card,
-            .time-card {
+            .card {
                 min-width: 100%;
                 min-height: 250px;
-                padding: 2rem;
+                padding: 1.5rem;
             }
             
-            .time-display {
+            .pomodoro-display {
                 font-size: 3rem;
             }
             
@@ -268,16 +338,17 @@
                 font-size: 1rem;
             }
             
-            .time-display {
+            .pomodoro-display {
                 font-size: 2.5rem;
-            }
-            
-            .date-display {
-                font-size: 1.1rem;
             }
             
             .card-title {
                 font-size: 1.2rem;
+            }
+            
+            .pomodoro-controls {
+                flex-direction: column;
+                align-items: center;
             }
         }
     </style>
@@ -293,7 +364,8 @@
         </header>
         
         <div class="main-content">
-            <div class="radio-card">
+            <!-- Radio Card -->
+            <div class="card">
                 <div class="card-title">
                     <i class="fas fa-broadcast-tower"></i>
                     <h3>LoFi Radio</h3>
@@ -305,13 +377,52 @@
                 </div>
             </div>
             
-            <div class="time-card">
+            <!-- Time Card -->
+            <div class="card">
                 <div class="card-title">
                     <i class="far fa-clock"></i>
                     <h3>Current Time</h3>
                 </div>
-                <div class="time-display" id="timeDisplay">00:00:00</div>
+                <div class="pomodoro-display" id="timeDisplay">00:00:00</div>
                 <div class="date-display" id="dateDisplay">Monday, January 1, 2023</div>
+            </div>
+            
+            <!-- Doodle Board Card -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-pencil-alt"></i>
+                    <h3>Doodle Board</h3>
+                </div>
+                <canvas id="doodleCanvas" width="100%" height="200"></canvas>
+                <div class="doodle-controls">
+                    <input type="color" class="color-picker" id="colorPicker" value="#5ce1e6">
+                    <button class="doodle-btn" id="clearDoodle">Clear</button>
+                    <button class="doodle-btn" id="thickLine">Thick</button>
+                    <button class="doodle-btn" id="thinLine">Thin</button>
+                </div>
+            </div>
+            
+            <!-- Pomodoro Timer Card -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-hourglass-half"></i>
+                    <h3>Pomodoro Timer</h3>
+                </div>
+                <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
+                <div class="pomodoro-controls">
+                    <button class="pomodoro-btn start-btn" id="pomodoroStart">Start</button>
+                    <button class="pomodoro-btn reset-btn" id="pomodoroReset">Reset</button>
+                </div>
+                <div class="pomodoro-settings">
+                    <div class="setting">
+                        <label for="workMinutes">Work (min)</label>
+                        <input type="number" id="workMinutes" min="1" max="60" value="25">
+                    </div>
+                    <div class="setting">
+                        <label for="breakMinutes">Break (min)</label>
+                        <input type="number" id="breakMinutes" min="1" max="30" value="5">
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -342,6 +453,196 @@
             
             updateClock();
             setInterval(updateClock, 1000);
+            
+            // Doodle Board functionality
+            const canvas = document.getElementById('doodleCanvas');
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let lineWidth = 3;
+            let color = '#5ce1e6';
+            
+            // Set canvas size
+            function resizeCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth - 40; // accounting for padding
+                canvas.height = 200;
+                ctx.lineWidth = lineWidth;
+                ctx.strokeStyle = color;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            
+            // Drawing functions
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('touchstart', startDrawing);
+            
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('touchmove', draw);
+            
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                draw(e);
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                // Get position
+                let x, y;
+                if (e.type.includes('touch')) {
+                    const touch = e.touches[0] || e.changedTouches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    x = touch.clientX - rect.left;
+                    y = touch.clientY - rect.top;
+                } else {
+                    x = e.offsetX;
+                    y = e.offsetY;
+                }
+                
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+                ctx.beginPath();
+            }
+            
+            // Doodle controls
+            document.getElementById('colorPicker').addEventListener('input', function(e) {
+                color = e.target.value;
+                ctx.strokeStyle = color;
+            });
+            
+            document.getElementById('clearDoodle').addEventListener('click', function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+            
+            document.getElementById('thickLine').addEventListener('click', function() {
+                lineWidth = 6;
+                ctx.lineWidth = lineWidth;
+            });
+            
+            document.getElementById('thinLine').addEventListener('click', function() {
+                lineWidth = 2;
+                ctx.lineWidth = lineWidth;
+            });
+            
+            // Pomodoro Timer functionality
+            const pomodoroDisplay = document.getElementById('pomodoroDisplay');
+            const startBtn = document.getElementById('pomodoroStart');
+            const resetBtn = document.getElementById('pomodoroReset');
+            const workMinutesInput = document.getElementById('workMinutes');
+            const breakMinutesInput = document.getElementById('breakMinutes');
+            
+            let timer;
+            let isRunning = false;
+            let isWorkTime = true;
+            let timeLeft = 25 * 60; // 25 minutes in seconds
+            let alarmSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+            
+            function updateDisplay() {
+                const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                const seconds = (timeLeft % 60).toString().padStart(2, '0');
+                pomodoroDisplay.textContent = `${minutes}:${seconds}`;
+                
+                // Change color based on mode
+                if (isWorkTime) {
+                    pomodoroDisplay.style.background = 'linear-gradient(90deg, var(--secondary), var(--accent))';
+                } else {
+                    pomodoroDisplay.style.background = 'linear-gradient(90deg, var(--accent), var(--primary))';
+                }
+            }
+            
+            function startTimer() {
+                if (isRunning) return;
+                
+                isRunning = true;
+                startBtn.textContent = 'Pause';
+                
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    
+                    // Play sound when 5 seconds left
+                    if (timeLeft === 5) {
+                        playCountdownSound();
+                    }
+                    
+                    // Timer finished
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        alarmSound.play();
+                        
+                        // Switch between work and break
+                        isWorkTime = !isWorkTime;
+                        if (isWorkTime) {
+                            timeLeft = parseInt(workMinutesInput.value) * 60;
+                        } else {
+                            timeLeft = parseInt(breakMinutesInput.value) * 60;
+                        }
+                        
+                        updateDisplay();
+                        startTimer(); // Auto-start next session
+                    }
+                }, 1000);
+            }
+            
+            function playCountdownSound() {
+                const countdownSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3');
+                countdownSound.volume = 0.3;
+                countdownSound.play();
+            }
+            
+            function pauseTimer() {
+                clearInterval(timer);
+                isRunning = false;
+                startBtn.textContent = 'Start';
+            }
+            
+            function resetTimer() {
+                pauseTimer();
+                isWorkTime = true;
+                timeLeft = parseInt(workMinutesInput.value) * 60;
+                updateDisplay();
+            }
+            
+            startBtn.addEventListener('click', function() {
+                if (isRunning) {
+                    pauseTimer();
+                } else {
+                    startTimer();
+                }
+            });
+            
+            resetBtn.addEventListener('click', resetTimer);
+            
+            // Initialize timer
+            resetTimer();
+            
+            // Update timer when settings change
+            workMinutesInput.addEventListener('change', function() {
+                if (!isRunning && isWorkTime) {
+                    timeLeft = parseInt(this.value) * 60;
+                    updateDisplay();
+                }
+            });
+            
+            breakMinutesInput.addEventListener('change', function() {
+                if (!isRunning && !isWorkTime) {
+                    timeLeft = parseInt(this.value) * 60;
+                    updateDisplay();
+                }
+            });
         });
     </script>
 
