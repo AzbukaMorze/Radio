@@ -129,6 +129,23 @@
             font-size: 1.6rem;
         }
         
+        /* Time Display Styles */
+        .time-display {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            color: var(--light);
+            margin: 1rem 0;
+        }
+        
+        .date-display {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #a0aec0;
+            margin-bottom: 1rem;
+        }
+        
         /* Doodle Board Styles */
         #doodleCanvas {
             background-color: rgba(255, 255, 255, 0.05);
@@ -173,11 +190,30 @@
             font-weight: 700;
             text-align: center;
             font-variant-numeric: tabular-nums;
-            background: linear-gradient(90deg, var(--secondary), var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            color: var(--light);
             margin: 1rem 0;
+            position: relative;
+        }
+        
+        .pomodoro-display::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            z-index: -1;
+        }
+        
+        .pomodoro-mode {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .pomodoro-controls {
@@ -198,6 +234,11 @@
         
         .start-btn {
             background: var(--primary);
+            color: white;
+        }
+        
+        .pause-btn {
+            background: #ff9500;
             color: white;
         }
         
@@ -320,6 +361,7 @@
                 padding: 1.5rem;
             }
             
+            .time-display,
             .pomodoro-display {
                 font-size: 3rem;
             }
@@ -338,8 +380,13 @@
                 font-size: 1rem;
             }
             
+            .time-display,
             .pomodoro-display {
                 font-size: 2.5rem;
+            }
+            
+            .date-display {
+                font-size: 1.1rem;
             }
             
             .card-title {
@@ -383,7 +430,7 @@
                     <i class="far fa-clock"></i>
                     <h3>Current Time</h3>
                 </div>
-                <div class="pomodoro-display" id="timeDisplay">00:00:00</div>
+                <div class="time-display" id="timeDisplay">00:00:00</div>
                 <div class="date-display" id="dateDisplay">Monday, January 1, 2023</div>
             </div>
             
@@ -408,9 +455,11 @@
                     <i class="fas fa-hourglass-half"></i>
                     <h3>Pomodoro Timer</h3>
                 </div>
+                <div class="pomodoro-mode" id="pomodoroMode">Work Time</div>
                 <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
                 <div class="pomodoro-controls">
                     <button class="pomodoro-btn start-btn" id="pomodoroStart">Start</button>
+                    <button class="pomodoro-btn pause-btn" id="pomodoroPause" style="display: none;">Pause</button>
                     <button class="pomodoro-btn reset-btn" id="pomodoroReset">Reset</button>
                 </div>
                 <div class="pomodoro-settings">
@@ -539,7 +588,9 @@
             
             // Pomodoro Timer functionality
             const pomodoroDisplay = document.getElementById('pomodoroDisplay');
+            const pomodoroMode = document.getElementById('pomodoroMode');
             const startBtn = document.getElementById('pomodoroStart');
+            const pauseBtn = document.getElementById('pomodoroPause');
             const resetBtn = document.getElementById('pomodoroReset');
             const workMinutesInput = document.getElementById('workMinutes');
             const breakMinutesInput = document.getElementById('breakMinutes');
@@ -549,25 +600,28 @@
             let isWorkTime = true;
             let timeLeft = 25 * 60; // 25 minutes in seconds
             let alarmSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+            let countdownSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3');
+            
+            // Preload sounds
+            alarmSound.load();
+            countdownSound.load();
             
             function updateDisplay() {
                 const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
                 const seconds = (timeLeft % 60).toString().padStart(2, '0');
                 pomodoroDisplay.textContent = `${minutes}:${seconds}`;
                 
-                // Change color based on mode
-                if (isWorkTime) {
-                    pomodoroDisplay.style.background = 'linear-gradient(90deg, var(--secondary), var(--accent))';
-                } else {
-                    pomodoroDisplay.style.background = 'linear-gradient(90deg, var(--accent), var(--primary))';
-                }
+                // Update mode display
+                pomodoroMode.textContent = isWorkTime ? "Work Time" : "Break Time";
+                pomodoroMode.style.color = isWorkTime ? "var(--secondary)" : "var(--accent)";
             }
             
             function startTimer() {
                 if (isRunning) return;
                 
                 isRunning = true;
-                startBtn.textContent = 'Pause';
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-block';
                 
                 timer = setInterval(() => {
                     timeLeft--;
@@ -581,7 +635,7 @@
                     // Timer finished
                     if (timeLeft <= 0) {
                         clearInterval(timer);
-                        alarmSound.play();
+                        playAlarmSound();
                         
                         // Switch between work and break
                         isWorkTime = !isWorkTime;
@@ -592,21 +646,28 @@
                         }
                         
                         updateDisplay();
-                        startTimer(); // Auto-start next session
+                        setTimeout(startTimer, 1000); // Auto-start next session after 1 sec
                     }
                 }, 1000);
             }
             
             function playCountdownSound() {
-                const countdownSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3');
+                countdownSound.currentTime = 0;
                 countdownSound.volume = 0.3;
-                countdownSound.play();
+                countdownSound.play().catch(e => console.log("Audio play failed:", e));
+            }
+            
+            function playAlarmSound() {
+                alarmSound.currentTime = 0;
+                alarmSound.volume = 0.5;
+                alarmSound.play().catch(e => console.log("Audio play failed:", e));
             }
             
             function pauseTimer() {
                 clearInterval(timer);
                 isRunning = false;
-                startBtn.textContent = 'Start';
+                startBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
             }
             
             function resetTimer() {
@@ -616,14 +677,8 @@
                 updateDisplay();
             }
             
-            startBtn.addEventListener('click', function() {
-                if (isRunning) {
-                    pauseTimer();
-                } else {
-                    startTimer();
-                }
-            });
-            
+            startBtn.addEventListener('click', startTimer);
+            pauseBtn.addEventListener('click', pauseTimer);
             resetBtn.addEventListener('click', resetTimer);
             
             // Initialize timer
