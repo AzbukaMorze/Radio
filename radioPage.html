@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lo-Fi Radio Station</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #8a5cf5;
+            --secondary: #ff6b8b;
+            --dark: #121826;
+            --darker: #0d1117;
+            --light: #f0f0f0;
+            --accent: #5ce1e6;
+            --glass: rgba(18, 24, 38, 0.7);
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Изменено для скролла */
+            overflow-y: auto; /* Добавлено для скролла */
+            position: relative;
+            padding: 2rem 0; /* Добавлено для скролла */
+        }
+        
+        body::before {
+            content: '';
+            position: fixed; /* Изменено на fixed для фиксированного фона */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdnb.artstation.com/p/assets/images/images/043/163/227/original/augustin-cart-gif-lofi-final.gif?1636484521') center/cover no-repeat;
+            opacity: 0.15;
+            z-index: -1;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px; /* Увеличено для растягивания */
+            padding: 2rem;
+            z-index: 10;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0aec0;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center; /* Центрируем карточки */
+        }
+        
+        .radio-card {
+            flex: 1 1 45%; /* Растягиваем и позволяем сжиматься */
+            min-width: 400px; /* Увеличено */
+            min-height: 300px; /* Добавлена высота */
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem; /* Увеличено */
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.8s ease-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Центрируем содержимое */
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.4rem; /* Увеличено */
+            margin-bottom: 1.5rem; /* Увеличено */
+            color: var(--accent);
+        }
+        
+        .card-title i {
+            font-size: 1.6rem; /* Увеличено */
+        }
+        
+        .time-card {
+            flex: 1 1 45%; /* Растягиваем и позволяем сжиматься */
+            min-width: 400px; /* Увеличено */
+            min-height: 300px; /* Добавлена высота */
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2.5rem; /* Увеличено */
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            animation: slideUp 1s ease-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .time-display {
+            font-size: 4rem; /* Увеличено */
+            font-weight: 700;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 1rem 0; /* Увеличено */
+        }
+        
+        .date-display {
+            text-align: center;
+            font-size: 1.3rem; /* Увеличено */
+            color: #a0aec0;
+        }
+        
+        .RP-SCRIPT {
+            margin-top: 2rem; /* Увеличено */
+            text-align: center;
+        }
+
+        .RP-LINK {
+            display: inline-block;
+            padding: 14px 28px; /* Увеличено */
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(138, 92, 245, 0.3);
+            font-size: 1.1rem; /* Увеличено */
+        }
+
+        .RP-LINK:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(138, 92, 245, 0.5);
+        }
+        
+        .footer {
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            animation: fadeIn 1.5s ease-out;
+            margin-top: 2rem; /* Добавлено */
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .radio-card,
+            .time-card {
+                min-width: 350px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .radio-card,
+            .time-card {
+                min-width: 100%;
+                min-height: 250px;
+                padding: 2rem;
+            }
+            
+            .time-display {
+                font-size: 3rem;
+            }
+            
+            .RP-LINK {
+                padding: 12px 24px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .time-display {
+                font-size: 2.5rem;
+            }
+            
+            .date-display {
+                font-size: 1.1rem;
+            }
+            
+            .card-title {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-headphones logo-icon"></i>
+                <h1>Lo-Fi Radio Station</h1>
+            </div>
+            <p class="subtitle">Relax, focus, and enjoy the perfect beats for studying, working or just chilling out</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="radio-card">
+                <div class="card-title">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <h3>LoFi Radio</h3>
+                </div>
+                <div class="RP-SCRIPT">
+                    <a class="RP-LINK" href="https://radiopotok.ru/lofiradio">
+                        <i class="fas fa-play-circle"></i> Play LoFi Radio
+                    </a>
+                </div>
+            </div>
+            
+            <div class="time-card">
+                <div class="card-title">
+                    <i class="far fa-clock"></i>
+                    <h3>Current Time</h3>
+                </div>
+                <div class="time-display" id="timeDisplay">00:00:00</div>
+                <div class="date-display" id="dateDisplay">Monday, January 1, 2023</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Made with <i class="fas fa-heart" style="color: var(--secondary);"></i> for Lo-Fi lovers everywhere</p>
+            <p>© 2023 Lo-Fi Radio Station. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clock functionality
+            function updateClock() {
+                const now = new Date();
+                const timeDisplay = document.getElementById('timeDisplay');
+                const dateDisplay = document.getElementById('dateDisplay');
+                
+                // Format time
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+                
+                // Format date
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+            }
+            
+            updateClock();
+            setInterval(updateClock, 1000);
+        });
+    </script>
+
+    <script defer src="https://radiopotok.ru/f/script6.1/2311.js" charset="UTF-8"></script>
+</body>
+</html>
