@@ -42,9 +42,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('https://cdnb.artstation.com/p/assets/images/images/043/163/227/original/augustin-cart-gif-lofi-final.gif?1636484521') center/cover no-repeat;
-            opacity: 0.15;
+            opacity: 0.45;
             z-index: -1;
+            filter: sepia(0.3) hue-rotate(15deg) blur(1px);
         }
         
         .container {
@@ -480,6 +480,27 @@
             <p>© 2023 Lo-Fi Radio Station. All rights reserved.</p>
         </div>
     </div>
+
+    <script>
+        const bg = document.querySelector('body::before');
+        const gifs = [
+        'url(https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzd6Njlienk4bmNoaWU0Y2FvdHVrMTA1dTd4M255ZXh4M2FrOGEwYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IDfre6fw3xBcHCESQZ/giphy.gif)',
+        'url(https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnd6dzlkZzd5MGt1bTJ6b2kxdGhybng0em1scnBld2gxdmVhcnBsdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/41Vg2MB3fOhrv49Vwz/giphy.gif)',
+        'url(https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDBpOHVlcmgyMDIyNnI1dzh3MHF3dDJ3M3JlbHE0OHN1MnVxZTczYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Fbox1ygIqnga5dLinz/giphy.gif)',    
+        'url(https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzd6Njlienk4bmNoaWU0Y2FvdHVrMTA1dTd4M255ZXh4M2FrOGEwYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IDfre6fw3xBcHCESQZ/giphy.gif)',
+        'url(https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmp6NjN2aWdwaDNnaGRuYTM3aDdianJiNmM1aTJnZWF1Ymdld2o5bCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/CW16nFVXLSQxSMUEMd/giphy.gif)',
+        'url(https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTR6ZGk5aDNwYWZ5b3FrbXBoaWV3NGh5aXF1Z2s2ZGsyYThqNnYwdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dvreHY4p06lzVSDrvj/giphy.gif)',
+        'url(https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3ZxZ2Q1Y3ZhdjV3MXFqbjJnOWU3dzU2NTBqcjFtZng2YjRzamxreCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LrGCXdMZYjwhQ95HIL/giphy.gif)',
+        'url(https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHB5YWN6d2g3MnNmcTMxeGM0OHR3bDI1dmplZ282c3k0amhlN3pxbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LSKHkpRJySs5W81D7B/giphy.gif)',
+        'url(https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZTE2YmNqYWduOWlxcWQzMGY5eDNkaTRlMzVmcDg1eXprczlwdWp3ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IeSXccYMz3K4U/giphy.gif)',
+        'url(https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbHVqY282eWdmM3A0czhvMWZxdThuaXB1bXdscGpxMWFvNzJwMHZ5dCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Yr0fcsov8KTMTIen32/giphy.gif)'
+        ];
+
+        document.body.addEventListener('click', () => {
+        const randomGif = gifs[Math.floor(Math.random() * gifs.length)];
+        document.body.style.backgroundImage = randomGif;
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
