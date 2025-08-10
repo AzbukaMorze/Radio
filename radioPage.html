@@ -1,727 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lo-Fi Radio Station</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        :root {
-            --primary: #8a5cf5;
-            --secondary: #ff6b8b;
-            --dark: #121826;
-            --darker: #0d1117;
-            --light: #f0f0f0;
-            --accent: #5ce1e6;
-            --glass: rgba(18, 24, 38, 0.7);
-        }
-        
-        body {
-            background: linear-gradient(135deg, var(--darker), var(--dark));
-            color: var(--light);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            overflow-y: auto;
-            position: relative;
-            padding: 2rem 0;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.45;
-            z-index: -1;
-            filter: sepia(0.3) hue-rotate(15deg) blur(1px);
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 2rem;
-            z-index: 10;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            animation: fadeIn 1s ease-out;
-        }
-        
-        .logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 1rem;
-        }
-        
-        .logo-icon {
-            font-size: 2.5rem;
-            color: var(--primary);
-            animation: pulse 2s infinite;
-        }
-        
-        h1 {
-            font-size: 3.2rem;
-            font-weight: 800;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            color: #a0aec0;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        .main-content {
-            display: flex;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .card {
-            flex: 1 1 45%;
-            min-width: 400px;
-            min-height: 300px;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.8s ease-out;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .card-title {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-size: 1.4rem;
-            margin-bottom: 1.5rem;
-            color: var(--accent);
-        }
-        
-        .card-title i {
-            font-size: 1.6rem;
-        }
-        
-        /* Time Display Styles */
-        .time-display {
-            font-size: 3.5rem;
-            font-weight: 700;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-            color: var(--light);
-            margin: 1rem 0;
-        }
-        
-        .date-display {
-            text-align: center;
-            font-size: 1.3rem;
-            color: #a0aec0;
-            margin-bottom: 1rem;
-        }
-        
-        /* Doodle Board Styles */
-        #doodleCanvas {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
-            flex-grow: 1;
-            cursor: crosshair;
-            touch-action: none;
-        }
-        
-        .doodle-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .doodle-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .doodle-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .color-picker {
-            width: 30px;
-            height: 30px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-        }
-        
-        /* Pomodoro Timer Styles */
-        .pomodoro-display {
-            font-size: 3.5rem;
-            font-weight: 700;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-            color: var(--light);
-            margin: 1rem 0;
-            position: relative;
-        }
-        
-        .pomodoro-display::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 0;
-            right: 0;
-            height: 4px;
-            border-radius: 2px;
-            background: linear-gradient(90deg, var(--secondary), var(--accent));
-            z-index: -1;
-        }
-        
-        .pomodoro-mode {
-            text-align: center;
-            font-size: 1rem;
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .pomodoro-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .pomodoro-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .start-btn {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .pause-btn {
-            background: #ff9500;
-            color: white;
-        }
-        
-        .reset-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        
-        .pomodoro-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .pomodoro-settings {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
-        
-        .setting {
-            text-align: center;
-        }
-        
-        .setting label {
-            display: block;
-            margin-bottom: 5px;
-            color: #a0aec0;
-        }
-        
-        .setting input {
-            width: 60px;
-            padding: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            color: white;
-            text-align: center;
-        }
-        
-        .RP-SCRIPT {
-            margin-top: auto;
-            text-align: center;
-            padding-top: 20px;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lo‑Fi Radio 2.0</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* -------------------- Reset & Vars -------------------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --primary:#8a5cf5; --secondary:#ff6b8b; --dark:#121826; --darker:#0d1117; --light:#f0f0f0;
+      --accent:#5ce1e6; --glass:rgba(18,24,38,0.65);
+      --radius:20px; --card-pad:2rem; --ease: cubic-bezier(.2,.9,.28,1);
+    }
 
-        .RP-LINK {
-            display: inline-block;
-            padding: 14px 28px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            border-radius: 30px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(138, 92, 245, 0.3);
-            font-size: 1.1rem;
-        }
+    /* Theme helper (light variant example) */
+    :root[data-theme='warm']{
+      --primary:#f6a4ff; --secondary:#ffd166; --accent:#ff9f9f; --glass:rgba(255,255,255,0.06);
+    }
 
-        .RP-LINK:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(138, 92, 245, 0.5);
-        }
-        
-        .footer {
-            text-align: center;
-            color: #718096;
-            font-size: 0.9rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            animation: fadeIn 1.5s ease-out;
-            margin-top: 2rem;
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { 
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .card {
-                min-width: 350px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .container {
-                padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 2.5rem;
-            }
-            
-            .card {
-                min-width: 100%;
-                min-height: 250px;
-                padding: 1.5rem;
-            }
-            
-            .time-display,
-            .pomodoro-display {
-                font-size: 3rem;
-            }
-            
-            .RP-LINK {
-                padding: 12px 24px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .subtitle {
-                font-size: 1rem;
-            }
-            
-            .time-display,
-            .pomodoro-display {
-                font-size: 2.5rem;
-            }
-            
-            .date-display {
-                font-size: 1.1rem;
-            }
-            
-            .card-title {
-                font-size: 1.2rem;
-            }
-            
-            .pomodoro-controls {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-    </style>
+    html,body{height:100%}
+    body{
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height:100vh; background: linear-gradient(135deg,var(--darker),var(--dark));
+      color:var(--light); display:flex; justify-content:center; align-items:flex-start; padding:2rem 0; overflow:auto;
+      transition:background-image .8s var(--ease),background-color .4s var(--ease);
+    }
+
+    /* Background overlay for subtle tint */
+    body::before{content:'';position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.45));pointer-events:none;}
+
+    .container{width:100%;max-width:1200px;padding:1.25rem;z-index:10}
+
+    header{text-align:center;margin-bottom:2rem;animation:fadeIn .7s var(--ease) both}
+    .logo{display:flex;gap:12px;justify-content:center;align-items:center;margin-bottom:.5rem}
+    .logo-icon{font-size:2.2rem;color:var(--primary);animation:logoPulse 2.6s infinite}
+    h1{font-size:2.6rem;font-weight:800;background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.4px}
+    .subtitle{color:#a0aec0;max-width:700px;margin:0.5rem auto 0;line-height:1.5}
+
+    .controls-row{display:flex;gap:10px;justify-content:center;margin-top:12px}
+    .mini-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);color:var(--light);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
+    .mini-btn:focus{outline:2px solid rgba(255,255,255,0.06);outline-offset:2px}
+
+    .main-content{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-top:1.5rem}
+
+    .card{background:var(--glass);backdrop-filter:blur(8px);border-radius:var(--radius);padding:var(--card-pad);border:1px solid rgba(255,255,255,0.06);box-shadow:0 10px 30px rgba(0,0,0,0.32);display:flex;flex-direction:column;min-height:260px;transform:translateY(12px);opacity:0;animation:cardIn .6s var(--ease) forwards}
+    .card:hover{transform:translateY(0);box-shadow:0 18px 40px rgba(0,0,0,0.45),0 0 18px rgba(92,225,230,0.03)}
+
+    .card-title{display:flex;gap:.6rem;align-items:center;color:var(--accent);font-weight:700;margin-bottom:1rem}
+    .card-title i{font-size:1.35rem}
+
+    /* Clock */
+    .time-display,.pomodoro-display{font-variant-numeric:tabular-nums;font-weight:700;color:var(--light);text-align:center}
+    .time-display{font-size:2.6rem}
+    .date-display{color:#9aa6b8;text-align:center;margin-top:.5rem}
+
+    /* Doodle */
+    .doodle-canvas-wrap{border-radius:10px;border:1px dashed rgba(255,255,255,0.08);overflow:hidden;background:rgba(255,255,255,0.02);display:flex;flex-direction:column}
+    canvas#doodleCanvas{display:block;width:100%;height:220px;cursor:crosshair;touch-action:none}
+    .doodle-controls{display:flex;gap:.6rem;align-items:center;margin-top:12px}
+    .color-picker{width:36px;height:36px;border-radius:8px;border:0;padding:0}
+    .doodle-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;cursor:pointer}
+
+    /* Pomodoro */
+    .pomodoro-mode{text-align:center;color:var(--accent);text-transform:uppercase;font-size:.85rem;letter-spacing:1px}
+    .pomodoro-display{font-size:2.8rem;margin-top:.35rem}
+    .pomodoro-controls{display:flex;gap:12px;justify-content:center;margin-top:14px}
+    .pomodoro-btn{padding:10px 18px;border-radius:999px;border:0;cursor:pointer;font-weight:700}
+    .start-btn{background:var(--primary);color:white}
+    .pause-btn{background:#ff9500;color:white}
+    .reset-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--light)}
+
+    .pomodoro-settings{display:flex;gap:12px;justify-content:center;margin-top:12px}
+    .setting{display:flex;flex-direction:column;align-items:center;color:#a0aec0}
+    .setting input{width:64px;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--light);text-align:center}
+
+    /* Radio big link */
+    .radio-link{display:inline-block;padding:12px 22px;border-radius:999px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;text-decoration:none;font-weight:700;box-shadow:0 6px 18px rgba(138,92,245,0.24)}
+
+    .footer{text-align:center;color:#8292a3;font-size:.9rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.03);margin-top:1.5rem}
+
+    /* small utilities */
+    .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+
+    /* Animations */
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    @keyframes cardIn{to{opacity:1;transform:none}}
+    @keyframes logoPulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+    /* Responsive */
+    @media(max-width:900px){.main-content{grid-template-columns:1fr}.container{padding:0.5rem}.subtitle{padding:0 1rem}}
+
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <i class="fas fa-headphones logo-icon"></i>
-                <h1>Lo-Fi Radio Station</h1>
-            </div>
-            <p class="subtitle">Relax, focus, and enjoy the perfect beats for studying, working or just chilling out</p>
-        </header>
-        
-        <div class="main-content">
-            <!-- Radio Card -->
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-broadcast-tower"></i>
-                    <h3>LoFi Radio</h3>
-                </div>
-                <div class="RP-SCRIPT">
-                    <a class="RP-LINK" href="https://radiopotok.ru/lofiradio">
-                        <i class="fas fa-play-circle"></i> Play LoFi Radio
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Time Card -->
-            <div class="card">
-                <div class="card-title">
-                    <i class="far fa-clock"></i>
-                    <h3>Current Time</h3>
-                </div>
-                <div class="time-display" id="timeDisplay">00:00:00</div>
-                <div class="date-display" id="dateDisplay">Monday, January 1, 2023</div>
-            </div>
-            
-            <!-- Doodle Board Card -->
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-pencil-alt"></i>
-                    <h3>Doodle Board</h3>
-                </div>
-                <canvas id="doodleCanvas" width="100%" height="200"></canvas>
-                <div class="doodle-controls">
-                    <input type="color" class="color-picker" id="colorPicker" value="#5ce1e6">
-                    <button class="doodle-btn" id="clearDoodle">Clear</button>
-                    <button class="doodle-btn" id="thickLine">Thick</button>
-                    <button class="doodle-btn" id="thinLine">Thin</button>
-                </div>
-            </div>
-            
-            <!-- Pomodoro Timer Card -->
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-hourglass-half"></i>
-                    <h3>Pomodoro Timer</h3>
-                </div>
-                <div class="pomodoro-mode" id="pomodoroMode">Work Time</div>
-                <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
-                <div class="pomodoro-controls">
-                    <button class="pomodoro-btn start-btn" id="pomodoroStart">Start</button>
-                    <button class="pomodoro-btn pause-btn" id="pomodoroPause" style="display: none;">Pause</button>
-                    <button class="pomodoro-btn reset-btn" id="pomodoroReset">Reset</button>
-                </div>
-                <div class="pomodoro-settings">
-                    <div class="setting">
-                        <label for="workMinutes">Work (min)</label>
-                        <input type="number" id="workMinutes" min="1" max="60" value="25">
-                    </div>
-                    <div class="setting">
-                        <label for="breakMinutes">Break (min)</label>
-                        <input type="number" id="breakMinutes" min="1" max="30" value="5">
-                    </div>
-                </div>
-            </div>
+  <div class="container" role="main">
+    <header>
+      <div class="logo">
+        <i class="fas fa-headphones logo-icon" aria-hidden></i>
+        <h1>Lo‑Fi Radio</h1>
+      </div>
+      <p class="subtitle">Relax, focus, and enjoy perfect beats for studying, working or just chilling out — now with better accessibility, responsive doodles and a smarter Pomodoro.</p>
+
+      <div class="controls-row" aria-hidden>
+        <button class="mini-btn" id="bgChangeBtn" title="Change background GIF">Change Background</button>
+        <button class="mini-btn" id="themeToggle" aria-pressed="false">Toggle Theme</button>
+        <button class="mini-btn" id="saveDoodle" title="Download drawing">Download Drawing</button>
+      </div>
+    </header>
+
+    <section class="main-content">
+      <!-- Radio Card -->
+      <article class="card" style="animation-delay:.05s">
+        <div class="card-title"><i class="fas fa-broadcast-tower" aria-hidden></i><div>LoFi Radio</div></div>
+        <p style="color:#b6c2d0; margin-bottom:1rem">Play a curated Lo‑Fi stream — minimal UI so you can focus.</p>
+        <div style="margin-top:auto;display:flex;justify-content:center">
+          <a class="radio-link" href="https://radiopotok.ru/lofiradio" target="_blank" rel="noopener noreferrer" aria-label="Open LoFi Radio stream">
+            <i class="fas fa-play-circle" aria-hidden></i> Play LoFi Radio
+          </a>
         </div>
-        
-        <div class="footer">
-            <p>Made with <i class="fas fa-heart" style="color: var(--secondary);"></i> for Lo-Fi lovers everywhere</p>
-            <p>© 2023 Lo-Fi Radio Station. All rights reserved.</p>
+      </article>
+
+      <!-- Time Card -->
+      <article class="card" style="animation-delay:.12s">
+        <div class="card-title"><i class="far fa-clock" aria-hidden></i><div>Current Time</div></div>
+        <div class="time-display" id="timeDisplay" aria-live="polite">00:00:00</div>
+        <div class="date-display" id="dateDisplay">—</div>
+      </article>
+
+      <!-- Doodle Board Card -->
+      <article class="card" style="animation-delay:.18s">
+        <div class="card-title"><i class="fas fa-pencil-alt" aria-hidden></i><div>Doodle Board</div></div>
+        <div class="doodle-canvas-wrap">
+          <canvas id="doodleCanvas" aria-label="Doodle canvas"></canvas>
         </div>
-    </div>
+        <div class="doodle-controls">
+          <input class="color-picker" id="colorPicker" type="color" value="#5ce1e6" aria-label="Choose color">
+          <button class="doodle-btn" id="clearDoodle">Clear</button>
+          <button class="doodle-btn" id="thickLine">Thick</button>
+          <button class="doodle-btn" id="thinLine">Thin</button>
+        </div>
+      </article>
 
-    <script>
-        const bg = document.querySelector('body::before');
-        const gifs = [
-        'url(https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzd6Njlienk4bmNoaWU0Y2FvdHVrMTA1dTd4M255ZXh4M2FrOGEwYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IDfre6fw3xBcHCESQZ/giphy.gif)',
-        'url(https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnd6dzlkZzd5MGt1bTJ6b2kxdGhybng0em1scnBld2gxdmVhcnBsdCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/41Vg2MB3fOhrv49Vwz/giphy.gif)',
-        'url(https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDBpOHVlcmgyMDIyNnI1dzh3MHF3dDJ3M3JlbHE0OHN1MnVxZTczYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Fbox1ygIqnga5dLinz/giphy.gif)',    
-        'url(https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzd6Njlienk4bmNoaWU0Y2FvdHVrMTA1dTd4M255ZXh4M2FrOGEwYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IDfre6fw3xBcHCESQZ/giphy.gif)',
-        'url(https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmp6NjN2aWdwaDNnaGRuYTM3aDdianJiNmM1aTJnZWF1Ymdld2o5bCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/CW16nFVXLSQxSMUEMd/giphy.gif)',
-        'url(https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTR6ZGk5aDNwYWZ5b3FrbXBoaWV3NGh5aXF1Z2s2ZGsyYThqNnYwdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dvreHY4p06lzVSDrvj/giphy.gif)',
-        'url(https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3ZxZ2Q1Y3ZhdjV3MXFqbjJnOWU3dzU2NTBqcjFtZng2YjRzamxreCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LrGCXdMZYjwhQ95HIL/giphy.gif)',
-        'url(https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHB5YWN6d2g3MnNmcTMxeGM0OHR3bDI1dmplZ282c3k0amhlN3pxbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LSKHkpRJySs5W81D7B/giphy.gif)',
-        'url(https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZTE2YmNqYWduOWlxcWQzMGY5eDNkaTRlMzVmcDg1eXprczlwdWp3ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IeSXccYMz3K4U/giphy.gif)',
-        'url(https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbHVqY282eWdmM3A0czhvMWZxdThuaXB1bXdscGpxMWFvNzJwMHZ5dCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Yr0fcsov8KTMTIen32/giphy.gif)'
-        ];
+      <!-- Pomodoro Card -->
+      <article class="card" style="animation-delay:.24s">
+        <div class="card-title"><i class="fas fa-hourglass-half" aria-hidden></i><div>Pomodoro Timer</div></div>
+        <div class="pomodoro-mode" id="pomodoroMode">Work Time</div>
+        <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
 
-        document.body.addEventListener('click', () => {
-        const randomGif = gifs[Math.floor(Math.random() * gifs.length)];
-        document.body.style.backgroundImage = randomGif;
-        });
-    </script>
+        <div class="pomodoro-controls">
+          <button class="pomodoro-btn start-btn" id="pomodoroStart" aria-label="Start timer">Start</button>
+          <button class="pomodoro-btn pause-btn" id="pomodoroPause" aria-label="Pause timer" hidden>Pause</button>
+          <button class="pomodoro-btn reset-btn" id="pomodoroReset" aria-label="Reset timer">Reset</button>
+        </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Clock functionality
-            function updateClock() {
-                const now = new Date();
-                const timeDisplay = document.getElementById('timeDisplay');
-                const dateDisplay = document.getElementById('dateDisplay');
-                
-                // Format time
-                const hours = now.getHours().toString().padStart(2, '0');
-                const minutes = now.getMinutes().toString().padStart(2, '0');
-                const seconds = now.getSeconds().toString().padStart(2, '0');
-                timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
-                
-                // Format date
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                dateDisplay.textContent = now.toLocaleDateString('en-US', options);
-            }
-            
-            updateClock();
-            setInterval(updateClock, 1000);
-            
-            // Doodle Board functionality
-            const canvas = document.getElementById('doodleCanvas');
-            const ctx = canvas.getContext('2d');
-            let isDrawing = false;
-            let lineWidth = 3;
-            let color = '#5ce1e6';
-            
-            // Set canvas size
-            function resizeCanvas() {
-                const container = canvas.parentElement;
-                canvas.width = container.clientWidth - 40; // accounting for padding
-                canvas.height = 200;
-                ctx.lineWidth = lineWidth;
-                ctx.strokeStyle = color;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-            }
-            
-            window.addEventListener('resize', resizeCanvas);
-            resizeCanvas();
-            
-            // Drawing functions
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('touchstart', startDrawing);
-            
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('touchmove', draw);
-            
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('touchend', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
-            
-            function startDrawing(e) {
-                isDrawing = true;
-                draw(e);
-            }
-            
-            function draw(e) {
-                if (!isDrawing) return;
-                
-                // Get position
-                let x, y;
-                if (e.type.includes('touch')) {
-                    const touch = e.touches[0] || e.changedTouches[0];
-                    const rect = canvas.getBoundingClientRect();
-                    x = touch.clientX - rect.left;
-                    y = touch.clientY - rect.top;
-                } else {
-                    x = e.offsetX;
-                    y = e.offsetY;
-                }
-                
-                ctx.lineTo(x, y);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-            }
-            
-            function stopDrawing() {
-                isDrawing = false;
-                ctx.beginPath();
-            }
-            
-            // Doodle controls
-            document.getElementById('colorPicker').addEventListener('input', function(e) {
-                color = e.target.value;
-                ctx.strokeStyle = color;
-            });
-            
-            document.getElementById('clearDoodle').addEventListener('click', function() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            });
-            
-            document.getElementById('thickLine').addEventListener('click', function() {
-                lineWidth = 6;
-                ctx.lineWidth = lineWidth;
-            });
-            
-            document.getElementById('thinLine').addEventListener('click', function() {
-                lineWidth = 2;
-                ctx.lineWidth = lineWidth;
-            });
-            
-            // Pomodoro Timer functionality
-            const pomodoroDisplay = document.getElementById('pomodoroDisplay');
-            const pomodoroMode = document.getElementById('pomodoroMode');
-            const startBtn = document.getElementById('pomodoroStart');
-            const pauseBtn = document.getElementById('pomodoroPause');
-            const resetBtn = document.getElementById('pomodoroReset');
-            const workMinutesInput = document.getElementById('workMinutes');
-            const breakMinutesInput = document.getElementById('breakMinutes');
-            
-            let timer;
-            let isRunning = false;
-            let isWorkTime = true;
-            let timeLeft = 25 * 60; // 25 minutes in seconds
-            let alarmSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
-            let countdownSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3');
-            
-            // Preload sounds
-            alarmSound.load();
-            countdownSound.load();
-            
-            function updateDisplay() {
-                const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-                const seconds = (timeLeft % 60).toString().padStart(2, '0');
-                pomodoroDisplay.textContent = `${minutes}:${seconds}`;
-                
-                // Update mode display
-                pomodoroMode.textContent = isWorkTime ? "Work Time" : "Break Time";
-                pomodoroMode.style.color = isWorkTime ? "var(--secondary)" : "var(--accent)";
-            }
-            
-            function startTimer() {
-                if (isRunning) return;
-                
-                isRunning = true;
-                startBtn.style.display = 'none';
-                pauseBtn.style.display = 'inline-block';
-                
-                timer = setInterval(() => {
-                    timeLeft--;
-                    updateDisplay();
-                    
-                    // Play sound when 5 seconds left
-                    if (timeLeft === 5) {
-                        playCountdownSound();
-                    }
-                    
-                    // Timer finished
-                    if (timeLeft <= 0) {
-                        clearInterval(timer);
-                        playAlarmSound();
-                        
-                        // Switch between work and break
-                        isWorkTime = !isWorkTime;
-                        if (isWorkTime) {
-                            timeLeft = parseInt(workMinutesInput.value) * 60;
-                        } else {
-                            timeLeft = parseInt(breakMinutesInput.value) * 60;
-                        }
-                        
-                        updateDisplay();
-                        setTimeout(startTimer, 1000); // Auto-start next session after 1 sec
-                    }
-                }, 1000);
-            }
-            
-            function playCountdownSound() {
-                countdownSound.currentTime = 0;
-                countdownSound.volume = 0.3;
-                countdownSound.play().catch(e => console.log("Audio play failed:", e));
-            }
-            
-            function playAlarmSound() {
-                alarmSound.currentTime = 0;
-                alarmSound.volume = 0.5;
-                alarmSound.play().catch(e => console.log("Audio play failed:", e));
-            }
-            
-            function pauseTimer() {
-                clearInterval(timer);
-                isRunning = false;
-                startBtn.style.display = 'inline-block';
-                pauseBtn.style.display = 'none';
-            }
-            
-            function resetTimer() {
-                pauseTimer();
-                isWorkTime = true;
-                timeLeft = parseInt(workMinutesInput.value) * 60;
-                updateDisplay();
-            }
-            
-            startBtn.addEventListener('click', startTimer);
-            pauseBtn.addEventListener('click', pauseTimer);
-            resetBtn.addEventListener('click', resetTimer);
-            
-            // Initialize timer
-            resetTimer();
-            
-            // Update timer when settings change
-            workMinutesInput.addEventListener('change', function() {
-                if (!isRunning && isWorkTime) {
-                    timeLeft = parseInt(this.value) * 60;
-                    updateDisplay();
-                }
-            });
-            
-            breakMinutesInput.addEventListener('change', function() {
-                if (!isRunning && !isWorkTime) {
-                    timeLeft = parseInt(this.value) * 60;
-                    updateDisplay();
-                }
-            });
-        });
-    </script>
+        <div class="pomodoro-settings">
+          <div class="setting"><label for="workMinutes">Work (min)</label><input id="workMinutes" type="number" min="1" max="60" value="25"></div>
+          <div class="setting"><label for="breakMinutes">Break (min)</label><input id="breakMinutes" type="number" min="1" max="60" value="5"></div>
+        </div>
+      </article>
+    </section>
 
-    <script defer src="https://radiopotok.ru/f/script6.1/2311.js" charset="UTF-8"></script>
+    <footer class="footer">
+      <p>Made with <i class="fas fa-heart" style="color:var(--secondary)" aria-hidden></i> for Lo‑Fi lovers everywhere</p>
+      <p>© <span id="copyrightYear"></span> Lo‑Fi Radio. All rights reserved.</p>
+    </footer>
+
+  </div>
+
+  <!-- External radio widget (kept as in original) -->
+  <script defer src="https://radiopotok.ru/f/script6.1/2311.js" charset="UTF-8"></script>
+
+  <script>
+    /* ================== Utilities & State ================== */
+    const gifs = [
+      'url(https://media1.giphy.com/media/IDfre6fw3xBcHCESQZ/giphy.gif)',
+      'url(https://media3.giphy.com/media/41Vg2MB3fOhrv49Vwz/giphy.gif)',
+      'url(https://media0.giphy.com/media/Fbox1ygIqnga5dLinz/giphy.gif)',
+      'url(https://media3.giphy.com/media/CW16nFVXLSQxSMUEMd/giphy.gif)',
+      'url(https://media0.giphy.com/media/dvreHY4p06lzVSDrvj/giphy.gif)',
+      'url(https://media4.giphy.com/media/LrGCXdMZYjwhQ95HIL/giphy.gif)'
+    ];
+
+    // Elements
+    const bgBtn = document.getElementById('bgChangeBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    const saveDoodleBtn = document.getElementById('saveDoodle');
+
+    /* ----------------- Background change ----------------- */
+    function setRandomBackground(){
+      const url = gifs[Math.floor(Math.random()*gifs.length)];
+      document.body.style.backgroundImage = url;
+    }
+    bgBtn.addEventListener('click', setRandomBackground);
+
+    /* ----------------- Theme toggle ----------------- */
+    themeToggle.addEventListener('click', ()=>{
+      const root = document.documentElement;
+      const isWarm = root.getAttribute('data-theme') === 'warm';
+      root.setAttribute('data-theme', isWarm ? '' : 'warm');
+      themeToggle.setAttribute('aria-pressed', String(!isWarm));
+    });
+
+    /* ================ Clock ================ */
+    function updateClock(){
+      const now = new Date();
+      const timeEl = document.getElementById('timeDisplay');
+      const dateEl = document.getElementById('dateDisplay');
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ss = String(now.getSeconds()).padStart(2,'0');
+      timeEl.textContent = `${hh}:${mm}:${ss}`;
+      dateEl.textContent = now.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    }
+    updateClock(); setInterval(updateClock,1000);
+
+    /* ================ Doodle Canvas ================ */
+    const canvas = document.getElementById('doodleCanvas');
+    const ctx = canvas.getContext('2d', {alpha:true});
+    let drawing = false; let lineWidth = 3; let strokeColor = document.getElementById('colorPicker').value;
+
+    // retina friendly sizing helper
+    function resizeCanvas(){
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      // preserve content by drawing previous image onto temporary image
+      const dataUrl = canvas.toDataURL();
+
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      ctx.scale(dpr, dpr);
+
+      // restore
+      if(dataUrl){
+        const img = new Image();
+        img.onload = ()=>{ ctx.drawImage(img,0,0,rect.width,rect.height); };
+        img.src = dataUrl;
+      }
+
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = lineWidth; ctx.strokeStyle = strokeColor;
+    }
+
+    // initialize a sensible height
+    function setCanvasHeight(h=220){ canvas.style.height = h+'px'; resizeCanvas(); }
+    setCanvasHeight(220);
+    window.addEventListener('resize', ()=>{ resizeCanvas(); }, {passive:true});
+
+    // pointer helpers (mouse+touch unified using Pointer Events if available)
+    function getPointerPos(e){
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX ?? e.touches?.[0]?.clientX) - rect.left;
+      const y = (e.clientY ?? e.touches?.[0]?.clientY) - rect.top;
+      return {x,y};
+    }
+
+    // Use pointer events when available
+    canvas.addEventListener('pointerdown', (e)=>{ drawing=true; const p=getPointerPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault(); });
+    canvas.addEventListener('pointermove', (e)=>{ if(!drawing) return; const p=getPointerPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+    canvas.addEventListener('pointerup', ()=>{ drawing=false; ctx.beginPath(); });
+    canvas.addEventListener('pointercancel', ()=>{ drawing=false; ctx.beginPath(); });
+
+    // controls
+    document.getElementById('colorPicker').addEventListener('input', (e)=>{ strokeColor = e.target.value; ctx.strokeStyle = strokeColor; });
+    document.getElementById('clearDoodle').addEventListener('click', ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); });
+    document.getElementById('thickLine').addEventListener('click', ()=>{ lineWidth = 6; ctx.lineWidth = lineWidth; });
+    document.getElementById('thinLine').addEventListener('click', ()=>{ lineWidth = 2; ctx.lineWidth = lineWidth; });
+
+    saveDoodleBtn.addEventListener('click', ()=>{
+      // download high-res PNG
+      const link = document.createElement('a');
+      link.download = `doodle-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    /* ================ Pomodoro ================ */
+    const pomodoroDisplay = document.getElementById('pomodoroDisplay');
+    const pomodoroMode = document.getElementById('pomodoroMode');
+    const startBtn = document.getElementById('pomodoroStart');
+    const pauseBtn = document.getElementById('pomodoroPause');
+    const resetBtn = document.getElementById('pomodoroReset');
+    const workInput = document.getElementById('workMinutes');
+    const breakInput = document.getElementById('breakMinutes');
+
+    let timerId = null, isRunning = false, isWork = true;
+    let timeLeft = parseInt(workInput.value,10)*60;
+
+    const alarmSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+    const countdownSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3');
+
+    function updatePomDisplay(){
+      const mm = String(Math.floor(timeLeft/60)).padStart(2,'0');
+      const ss = String(timeLeft%60).padStart(2,'0');
+      pomodoroDisplay.textContent = `${mm}:${ss}`;
+      pomodoroMode.textContent = isWork ? 'Work Time' : 'Break Time';
+      pomodoroMode.style.color = isWork ? 'var(--secondary)' : 'var(--accent)';
+    }
+
+    function playSound(sound, vol=0.5){ sound.currentTime=0; sound.volume=vol; sound.play().catch(()=>{}); }
+
+    function startPomodoro(){ if(isRunning) return; isRunning=true; startBtn.hidden=true; pauseBtn.hidden=false; timerId = setInterval(()=>{
+      timeLeft--; if(timeLeft===5) playSound(countdownSound,0.25);
+      if(timeLeft<=0){ clearInterval(timerId); playSound(alarmSound,0.6); // vibrate if supported
+        try{ navigator.vibrate?.([200,120,200]); }catch(e){}
+        // swap
+        isWork = !isWork; timeLeft = (isWork? parseInt(workInput.value,10): parseInt(breakInput.value,10))*60; updatePomDisplay(); // auto-start next after short pause
+        setTimeout(startPomodoro, 1000);
+      }
+      updatePomDisplay();
+    },1000); }
+
+    function pausePomodoro(){ if(!isRunning) return; clearInterval(timerId); isRunning=false; startBtn.hidden=false; pauseBtn.hidden=true; }
+    function resetPomodoro(){ pausePomodoro(); isWork=true; timeLeft = parseInt(workInput.value,10)*60; updatePomDisplay(); }
+
+    startBtn.addEventListener('click', startPomodoro); pauseBtn.addEventListener('click', pausePomodoro); resetBtn.addEventListener('click', resetPomodoro);
+
+    // keep display in sync with input change when not running
+    workInput.addEventListener('change', ()=>{ if(!isRunning && isWork){ timeLeft = parseInt(workInput.value,10)*60; updatePomDisplay(); }});
+    breakInput.addEventListener('change', ()=>{ if(!isRunning && !isWork){ timeLeft = parseInt(breakInput.value,10)*60; updatePomDisplay(); }});
+
+    // initialize
+    (function init(){ updatePomDisplay(); document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+      // set an initial background
+      setRandomBackground();
+      // setup pointer events fallback for older browsers
+      ['touchstart','touchmove','touchend'].forEach(ev=>{ canvas.addEventListener(ev, (e)=>e.preventDefault(), {passive:false}); });
+    })();
+
+  </script>
 </body>
 </html>
