@@ -41,6 +41,7 @@
     .controls-row{display:flex;gap:10px;justify-content:center;margin-top:12px}
     .mini-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);color:var(--light);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
     .mini-btn:focus{outline:2px solid rgba(255,255,255,0.06);outline-offset:2px}
+    .is-hidden{display:none!important}
 
     .main-content{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-top:1.5rem}
 
@@ -88,6 +89,7 @@
     .radio-note{color:#9aa6b8;text-align:center;font-size:.9rem}
 
     .footer{text-align:center;color:#8292a3;font-size:.9rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.03);margin-top:1.5rem}
+    body[data-focus='true'] #timeCard, body[data-focus='true'] #doodleCard{display:none}
 
     /* small utilities */
     .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
@@ -112,16 +114,17 @@
       </div>
       <p class="subtitle">Relax, focus, and switch between Lo-Fi, ambient and chill stations - with a clean player, doodles and a smarter Pomodoro.</p>
 
-      <div class="controls-row" aria-hidden>
+      <div class="controls-row">
         <button class="mini-btn" id="bgChangeBtn" title="Change background GIF">Change Background</button>
         <button class="mini-btn" id="themeToggle" aria-pressed="false">Toggle Theme</button>
+        <button class="mini-btn" id="focusToggle" aria-pressed="false">Enable Focus Mode</button>
         <button class="mini-btn" id="saveDoodle" title="Download drawing">Download Drawing</button>
       </div>
     </header>
 
     <section class="main-content">
       <!-- Radio Card -->
-      <article class="card" style="animation-delay:.05s">
+      <article class="card" id="radioCard" style="animation-delay:.05s">
         <div class="card-title"><i class="fas fa-broadcast-tower" aria-hidden></i><div>LoFi Radio</div></div>
         <p style="color:#b6c2d0; margin-bottom:1rem">Pick genre and station, then tap play. Built for mobile and desktop.</p>
         <div class="radio-embed">
@@ -154,14 +157,14 @@
       </article>
 
       <!-- Time Card -->
-      <article class="card" style="animation-delay:.12s">
+      <article class="card" id="timeCard" style="animation-delay:.12s">
         <div class="card-title"><i class="far fa-clock" aria-hidden></i><div>Current Time</div></div>
         <div class="time-display" id="timeDisplay" aria-live="polite">00:00:00</div>
         <div class="date-display" id="dateDisplay">-</div>
       </article>
 
       <!-- Doodle Board Card -->
-      <article class="card" style="animation-delay:.18s">
+      <article class="card" id="doodleCard" style="animation-delay:.18s">
         <div class="card-title"><i class="fas fa-pencil-alt" aria-hidden></i><div>Doodle Board</div></div>
         <div class="doodle-canvas-wrap">
           <canvas id="doodleCanvas" aria-label="Doodle canvas"></canvas>
@@ -175,7 +178,7 @@
       </article>
 
       <!-- Pomodoro Card -->
-      <article class="card" style="animation-delay:.24s">
+      <article class="card" id="pomodoroCard" style="animation-delay:.24s">
         <div class="card-title"><i class="fas fa-hourglass-half" aria-hidden></i><div>Pomodoro Timer</div></div>
         <div class="pomodoro-mode" id="pomodoroMode">Work Time</div>
         <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
@@ -214,6 +217,7 @@
     // Elements
     const bgBtn = document.getElementById('bgChangeBtn');
     const themeToggle = document.getElementById('themeToggle');
+    const focusToggleBtn = document.getElementById('focusToggle');
     const saveDoodleBtn = document.getElementById('saveDoodle');
     const lofiAudio = document.getElementById('lofiAudio');
     const playLofiBtn = document.getElementById('playLofi');
@@ -223,6 +227,35 @@
     const stationSelect = document.getElementById('stationSelect');
     const stationPageLink = document.getElementById('stationPageLink');
     const radioPrefsKey = 'lofiChillRadioPrefsV1';
+    const focusPrefsKey = 'lofiChillFocusModeV1';
+    let isFocusMode = false;
+
+    function loadFocusMode(){
+      try{
+        return localStorage.getItem(focusPrefsKey) === '1';
+      }catch(e){
+        return false;
+      }
+    }
+
+    function saveFocusMode(){
+      try{
+        localStorage.setItem(focusPrefsKey, isFocusMode ? '1' : '0');
+      }catch(e){}
+    }
+
+    function setFocusMode(enabled){
+      isFocusMode = Boolean(enabled);
+      document.body.setAttribute('data-focus', isFocusMode ? 'true' : 'false');
+      focusToggleBtn.setAttribute('aria-pressed', String(isFocusMode));
+      focusToggleBtn.textContent = isFocusMode ? 'Disable Focus Mode' : 'Enable Focus Mode';
+      saveDoodleBtn.classList.toggle('is-hidden', isFocusMode);
+    }
+
+    focusToggleBtn.addEventListener('click', ()=>{
+      setFocusMode(!isFocusMode);
+      saveFocusMode();
+    });
 
     /* ----------------- Radio player ----------------- */
     const stations = [
@@ -595,6 +628,8 @@
     (function init(){ updatePomDisplay(); document.getElementById('copyrightYear').textContent = new Date().getFullYear();
       // set an initial background
       setRandomBackground();
+      // restore focus mode state
+      setFocusMode(loadFocusMode());
       // setup pointer events fallback for older browsers
       ['touchstart','touchmove','touchend'].forEach(ev=>{ canvas.addEventListener(ev, (e)=>e.preventDefault(), {passive:false}); });
     })();
