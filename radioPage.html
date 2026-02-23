@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lo-Fi Radio 2.0</title>
+  <title>Lo-Fi + Chill Radio 2.0</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* -------------------- Reset & Vars -------------------- */
@@ -77,8 +77,13 @@
 
     /* Radio embed */
     .radio-embed{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+    .radio-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .radio-field{display:flex;flex-direction:column;gap:6px}
+    .radio-field label{font-size:.78rem;color:#9aa6b8;letter-spacing:.7px;text-transform:uppercase}
+    .radio-select{width:100%;padding:9px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,8,16,0.55);color:var(--light)}
+    .radio-select:focus{outline:2px solid rgba(92,225,230,0.35);outline-offset:1px}
     .radio-player{width:100%;min-height:54px;border-radius:12px;background:#0b0f18}
-    .radio-actions{display:flex;justify-content:center}
+    .radio-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
     .radio-link{display:inline-block;padding:12px 22px;border-radius:999px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;text-decoration:none;font-weight:700;box-shadow:0 6px 18px rgba(138,92,245,0.24);border:0;cursor:pointer}
     .radio-note{color:#9aa6b8;text-align:center;font-size:.9rem}
 
@@ -94,6 +99,7 @@
 
     /* Responsive */
     @media(max-width:900px){.main-content{grid-template-columns:1fr}.container{padding:0.5rem}.subtitle{padding:0 1rem}}
+    @media(max-width:640px){.radio-filters{grid-template-columns:1fr}}
 
   </style>
 </head>
@@ -102,9 +108,9 @@
     <header>
       <div class="logo">
         <i class="fas fa-headphones logo-icon" aria-hidden></i>
-        <h1>Lo-Fi Radio</h1>
+        <h1>Lo-Fi + Chill Radio</h1>
       </div>
-      <p class="subtitle">Relax, focus, and enjoy perfect beats for studying, working, or just chilling out - now with better accessibility, responsive doodles, and a smarter Pomodoro.</p>
+      <p class="subtitle">Relax, focus, and switch between Lo-Fi, ambient and chill stations - with a clean player, doodles and a smarter Pomodoro.</p>
 
       <div class="controls-row" aria-hidden>
         <button class="mini-btn" id="bgChangeBtn" title="Change background GIF">Change Background</button>
@@ -117,16 +123,29 @@
       <!-- Radio Card -->
       <article class="card" style="animation-delay:.05s">
         <div class="card-title"><i class="fas fa-broadcast-tower" aria-hidden></i><div>LoFi Radio</div></div>
-        <p style="color:#b6c2d0; margin-bottom:1rem">Play a curated Lo-Fi stream with minimal UI so you can focus.</p>
+        <p style="color:#b6c2d0; margin-bottom:1rem">Pick genre and station, then tap play. Built for mobile and desktop.</p>
         <div class="radio-embed">
+          <div class="radio-filters">
+            <div class="radio-field">
+              <label for="genreSelect">Genre</label>
+              <select id="genreSelect" class="radio-select" aria-label="Select radio genre"></select>
+            </div>
+            <div class="radio-field">
+              <label for="stationSelect">Station</label>
+              <select id="stationSelect" class="radio-select" aria-label="Select radio station"></select>
+            </div>
+          </div>
           <audio id="lofiAudio" class="radio-player" controls preload="none" playsinline aria-label="LoFi radio player"></audio>
           <div class="radio-actions">
             <button class="radio-link" id="playLofi" type="button" aria-label="Play LoFi radio">
               <i class="fas fa-play-circle" aria-hidden></i> Play LoFi
             </button>
+            <button class="radio-link" id="nextStationBtn" type="button" aria-label="Switch to next station">
+              <i class="fas fa-forward" aria-hidden></i> Next Station
+            </button>
           </div>
           <div class="radio-actions">
-            <a class="radio-link" href="https://somafm.com/groovesalad/" target="_blank" rel="noopener noreferrer" aria-label="Open LoFi station page in a new tab">
+            <a class="radio-link" id="stationPageLink" href="https://somafm.com/groovesalad/" target="_blank" rel="noopener noreferrer" aria-label="Open selected station page in a new tab">
               <i class="fas fa-external-link-alt" aria-hidden></i> Open Station Page
             </a>
           </div>
@@ -175,8 +194,8 @@
     </section>
 
     <footer class="footer">
-      <p>Made with <i class="fas fa-heart" style="color:var(--secondary)" aria-hidden></i> for Lo-Fi lovers everywhere</p>
-      <p>&copy; <span id="copyrightYear"></span> Lo-Fi Radio. All rights reserved.</p>
+      <p>Made with <i class="fas fa-heart" style="color:var(--secondary)" aria-hidden></i> for Lo-Fi and chill lovers everywhere</p>
+      <p>&copy; <span id="copyrightYear"></span> Lo-Fi + Chill Radio. All rights reserved.</p>
     </footer>
 
   </div>
@@ -198,19 +217,140 @@
     const saveDoodleBtn = document.getElementById('saveDoodle');
     const lofiAudio = document.getElementById('lofiAudio');
     const playLofiBtn = document.getElementById('playLofi');
+    const nextStationBtn = document.getElementById('nextStationBtn');
     const radioStatus = document.getElementById('radioStatus');
+    const genreSelect = document.getElementById('genreSelect');
+    const stationSelect = document.getElementById('stationSelect');
+    const stationPageLink = document.getElementById('stationPageLink');
+    const radioPrefsKey = 'lofiChillRadioPrefsV1';
 
     /* ----------------- Radio player ----------------- */
-    const radioStreams = [
-      'https://ice1.somafm.com/groovesalad-128-mp3',
-      'https://ice2.somafm.com/groovesalad-128-mp3'
+    const stations = [
+      {
+        id: 'lofi-hiphop',
+        name: 'LoFi Hip Hop',
+        genre: 'lofi',
+        pageUrl: 'https://zeno.fm/radio/LofiHipHopStream/',
+        streams: [
+          'https://stream.zeno.fm/hqbrk7skwxhvv',
+          'https://play.streamafrica.net/lofiradio'
+        ]
+      },
+      {
+        id: 'sf1033',
+        name: 'SomaFM SF 10-33',
+        genre: 'lofi',
+        pageUrl: 'https://somafm.com/sf1033/',
+        streams: [
+          'https://ice4.somafm.com/sf1033-128-mp3',
+          'https://ice2.somafm.com/sf1033-128-mp3'
+        ]
+      },
+      {
+        id: 'groove-salad',
+        name: 'Groove Salad',
+        genre: 'downtempo',
+        pageUrl: 'https://somafm.com/groovesalad/',
+        streams: [
+          'https://ice6.somafm.com/groovesalad-128-mp3',
+          'https://ice2.somafm.com/groovesalad-128-mp3'
+        ]
+      },
+      {
+        id: 'groove-salad-classic',
+        name: 'Groove Salad Classic',
+        genre: 'ambient',
+        pageUrl: 'https://somafm.com/gsclassic/',
+        streams: [
+          'https://ice5.somafm.com/gsclassic-128-mp3',
+          'https://ice1.somafm.com/gsclassic-128-mp3'
+        ]
+      },
+      {
+        id: 'drone-zone',
+        name: 'Drone Zone',
+        genre: 'ambient',
+        pageUrl: 'https://somafm.com/dronezone/',
+        streams: [
+          'https://ice2.somafm.com/dronezone-128-mp3',
+          'https://ice4.somafm.com/dronezone-128-mp3'
+        ]
+      },
+      {
+        id: 'cliqhop-idm',
+        name: 'Cliqhop IDM',
+        genre: 'idm',
+        pageUrl: 'https://somafm.com/cliqhop/',
+        streams: [
+          'https://ice2.somafm.com/cliqhop-128-mp3',
+          'https://ice4.somafm.com/cliqhop-128-mp3'
+        ]
+      }
     ];
+    const genreLabels = {
+      all: 'All Genres',
+      lofi: 'Lo-Fi',
+      ambient: 'Ambient',
+      downtempo: 'Downtempo',
+      idm: 'IDM / Beats'
+    };
+    let filteredStations = [];
+    let activeStation = null;
     let radioStreamIndex = 0;
+    let currentPrefs = { genre: 'lofi', stationId: '' };
+
+    function loadRadioPrefs(){
+      try{
+        const raw = localStorage.getItem(radioPrefsKey);
+        if(!raw) return null;
+        const parsed = JSON.parse(raw);
+        if(!parsed || typeof parsed !== 'object') return null;
+        return parsed;
+      }catch(e){
+        return null;
+      }
+    }
+
+    function saveRadioPrefs(){
+      if(!activeStation) return;
+      currentPrefs = { genre: genreSelect.value, stationId: activeStation.id };
+      try{
+        localStorage.setItem(radioPrefsKey, JSON.stringify(currentPrefs));
+      }catch(e){}
+    }
+
+    function populateGenres(){
+      const genres = ['all', ...new Set(stations.map((station)=>station.genre))];
+      genreSelect.innerHTML = genres.map((genre)=>`<option value="${genre}">${genreLabels[genre] || genre}</option>`).join('');
+      genreSelect.value = genres.includes('lofi') ? 'lofi' : 'all';
+    }
+
+    function populateStationOptions(genre){
+      filteredStations = stations.filter((station)=> genre === 'all' || station.genre === genre);
+      stationSelect.innerHTML = filteredStations.map((station)=>`<option value="${station.id}">${station.name}</option>`).join('');
+    }
 
     function setRadioStream(index){
+      if(!activeStation) return;
       radioStreamIndex = index;
-      lofiAudio.src = radioStreams[radioStreamIndex];
-      radioStatus.textContent = `Using stream ${radioStreamIndex + 1}/${radioStreams.length}.`;
+      lofiAudio.src = activeStation.streams[radioStreamIndex];
+      radioStatus.textContent = `${activeStation.name}: stream ${radioStreamIndex + 1}/${activeStation.streams.length}.`;
+    }
+
+    function setActiveStation(stationId, keepPlaying=false){
+      const nextStation = stations.find((station)=>station.id === stationId);
+      if(!nextStation) return;
+      const shouldResume = keepPlaying && !lofiAudio.paused;
+      activeStation = nextStation;
+      stationSelect.value = activeStation.id;
+      stationPageLink.href = activeStation.pageUrl;
+      stationPageLink.setAttribute('aria-label', `Open ${activeStation.name} station page in a new tab`);
+      setRadioStream(0);
+      if(shouldResume){
+        playRadio();
+      }
+      playLofiBtn.innerHTML = `<i class="fas ${lofiAudio.paused ? 'fa-play-circle' : 'fa-pause-circle'}" aria-hidden></i> ${lofiAudio.paused ? 'Play LoFi' : 'Pause LoFi'}`;
+      saveRadioPrefs();
     }
 
     async function playRadio(){
@@ -220,6 +360,62 @@
         radioStatus.textContent = 'Playback blocked. Tap Play LoFi again.';
       }
     }
+
+    function goToNextStation(keepPlaying=false){
+      if(filteredStations.length === 0) return;
+      const currentIndex = filteredStations.findIndex((station)=>station.id === activeStation?.id);
+      const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % filteredStations.length : 0;
+      setActiveStation(filteredStations[nextIndex].id, keepPlaying);
+    }
+
+    function initRadioState(){
+      const saved = loadRadioPrefs();
+      const initialGenre = saved?.genre && genreLabels[saved.genre] ? saved.genre : 'lofi';
+      currentPrefs = { genre: initialGenre, stationId: saved?.stationId || '' };
+
+      populateGenres();
+      genreSelect.value = currentPrefs.genre;
+      populateStationOptions(genreSelect.value);
+
+      if(filteredStations.length === 0){
+        genreSelect.value = 'all';
+        populateStationOptions('all');
+      }
+
+      if(filteredStations.length > 0){
+        const hasSavedStation = filteredStations.some((station)=>station.id === currentPrefs.stationId);
+        setActiveStation(hasSavedStation ? currentPrefs.stationId : filteredStations[0].id);
+      }else{
+        radioStatus.textContent = 'No stations found.';
+      }
+    }
+
+    initRadioState();
+
+    genreSelect.addEventListener('change', ()=>{
+      const keepPlaying = !lofiAudio.paused;
+      populateStationOptions(genreSelect.value);
+      if(filteredStations.length > 0){
+        const preferred = filteredStations.find((station)=>station.id === currentPrefs.stationId);
+        setActiveStation((preferred || filteredStations[0]).id, keepPlaying);
+      }else{
+        activeStation = null;
+        lofiAudio.removeAttribute('src');
+        radioStatus.textContent = 'No stations found for this genre.';
+        currentPrefs = { genre: genreSelect.value, stationId: '' };
+        try{
+          localStorage.setItem(radioPrefsKey, JSON.stringify(currentPrefs));
+        }catch(e){}
+      }
+    });
+
+    stationSelect.addEventListener('change', ()=>{
+      setActiveStation(stationSelect.value, !lofiAudio.paused);
+    });
+
+    nextStationBtn.addEventListener('click', ()=>{
+      goToNextStation(!lofiAudio.paused);
+    });
 
     playLofiBtn.addEventListener('click', async ()=>{
       if(lofiAudio.paused){
@@ -231,7 +427,9 @@
 
     lofiAudio.addEventListener('play', ()=>{
       playLofiBtn.innerHTML = '<i class="fas fa-pause-circle" aria-hidden></i> Pause LoFi';
-      radioStatus.textContent = `Playing stream ${radioStreamIndex + 1}/${radioStreams.length}.`;
+      if(activeStation){
+        radioStatus.textContent = `Playing ${activeStation.name} (${genreLabels[activeStation.genre] || activeStation.genre}), stream ${radioStreamIndex + 1}/${activeStation.streams.length}.`;
+      }
     });
 
     lofiAudio.addEventListener('pause', ()=>{
@@ -242,18 +440,22 @@
     });
 
     lofiAudio.addEventListener('error', ()=>{
-      if(radioStreamIndex < radioStreams.length - 1){
+      if(activeStation && radioStreamIndex < activeStation.streams.length - 1){
         const shouldResume = !lofiAudio.paused;
         setRadioStream(radioStreamIndex + 1);
-        radioStatus.textContent = `Stream failed, switching to ${radioStreamIndex + 1}/${radioStreams.length}...`;
+        radioStatus.textContent = `Stream failed, switching to ${radioStreamIndex + 1}/${activeStation.streams.length}...`;
         if(shouldResume){
           playRadio();
         }
       }else{
-        radioStatus.textContent = 'All streams failed. Try opening station page or switching network/VPN.';
+        if(filteredStations.length > 1){
+          radioStatus.textContent = 'Station unavailable, moving to next station...';
+          goToNextStation(!lofiAudio.paused);
+        }else{
+          radioStatus.textContent = 'This station is unavailable on current network. Try another station or switch network/VPN.';
+        }
       }
     });
-    setRadioStream(0);
 
     /* ----------------- Background change ----------------- */
     function setRandomBackground(){
