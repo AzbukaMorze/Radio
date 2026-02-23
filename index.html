@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lo-Fi + Chill Radio 2.0</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* -------------------- Reset & Vars -------------------- */
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --primary:#8a5cf5; --secondary:#ff6b8b; --dark:#121826; --darker:#0d1117; --light:#f0f0f0;
+      --accent:#5ce1e6; --glass:rgba(18,24,38,0.65);
+      --radius:20px; --card-pad:2rem; --ease: cubic-bezier(.2,.9,.28,1);
+    }
+
+    /* Theme helper (light variant example) */
+    :root[data-theme='warm']{
+      --primary:#f6a4ff; --secondary:#ffd166; --accent:#ff9f9f; --glass:rgba(255,255,255,0.06);
+    }
+
+    html,body{height:100%}
+    body{
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height:100vh; background: linear-gradient(135deg,var(--darker),var(--dark));
+      color:var(--light); display:flex; justify-content:center; align-items:flex-start; padding:2rem 0; overflow:auto;
+      transition:background-image .8s var(--ease),background-color .4s var(--ease);
+    }
+
+    /* Background overlay for subtle tint */
+    body::before{content:'';position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.45));pointer-events:none;}
+
+    .container{width:100%;max-width:1200px;padding:1.25rem;z-index:10}
+
+    header{text-align:center;margin-bottom:2rem;animation:fadeIn .7s var(--ease) both}
+    .logo{display:flex;gap:12px;justify-content:center;align-items:center;margin-bottom:.5rem}
+    .logo-icon{font-size:2.2rem;color:var(--primary);animation:logoPulse 2.6s infinite}
+    h1{font-size:2.6rem;font-weight:800;background:linear-gradient(90deg,var(--primary),var(--secondary));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.4px}
+    .subtitle{color:#a0aec0;max-width:700px;margin:0.5rem auto 0;line-height:1.5}
+
+    .controls-row{display:flex;gap:10px;justify-content:center;margin-top:12px}
+    .mini-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);color:var(--light);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
+    .mini-btn:focus{outline:2px solid rgba(255,255,255,0.06);outline-offset:2px}
+    .is-hidden{display:none!important}
+
+    .main-content{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-top:1.5rem}
+
+    .card{background:var(--glass);backdrop-filter:blur(8px);border-radius:var(--radius);padding:var(--card-pad);border:1px solid rgba(255,255,255,0.06);box-shadow:0 10px 30px rgba(0,0,0,0.32);display:flex;flex-direction:column;min-height:260px;transform:translateY(12px);opacity:0;animation:cardIn .6s var(--ease) forwards}
+    .card:hover{transform:translateY(0);box-shadow:0 18px 40px rgba(0,0,0,0.45),0 0 18px rgba(92,225,230,0.03)}
+
+    .card-title{display:flex;gap:.6rem;align-items:center;color:var(--accent);font-weight:700;margin-bottom:1rem}
+    .card-title i{font-size:1.35rem}
+
+    /* Clock */
+    .time-display,.pomodoro-display{font-variant-numeric:tabular-nums;font-weight:700;color:var(--light);text-align:center}
+    .time-display{font-size:2.6rem}
+    .date-display{color:#9aa6b8;text-align:center;margin-top:.5rem}
+
+    /* Doodle */
+    .doodle-canvas-wrap{border-radius:10px;border:1px dashed rgba(255,255,255,0.08);overflow:hidden;background:rgba(255,255,255,0.02);display:flex;flex-direction:column}
+    canvas#doodleCanvas{display:block;width:100%;height:220px;cursor:crosshair;touch-action:none}
+    .doodle-controls{display:flex;gap:.6rem;align-items:center;margin-top:12px}
+    .color-picker{width:36px;height:36px;border-radius:8px;border:0;padding:0}
+    .doodle-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;cursor:pointer}
+
+    /* Pomodoro */
+    .pomodoro-mode{text-align:center;color:var(--accent);text-transform:uppercase;font-size:.85rem;letter-spacing:1px}
+    .pomodoro-display{font-size:2.8rem;margin-top:.35rem}
+    .pomodoro-controls{display:flex;gap:12px;justify-content:center;margin-top:14px}
+    .pomodoro-btn{padding:10px 18px;border-radius:999px;border:0;cursor:pointer;font-weight:700}
+    .start-btn{background:var(--primary);color:white}
+    .pause-btn{background:#ff9500;color:white}
+    .reset-btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--light)}
+
+    .pomodoro-settings{display:flex;gap:12px;justify-content:center;margin-top:12px}
+    .setting{display:flex;flex-direction:column;align-items:center;color:#a0aec0}
+    .setting input{width:64px;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--light);text-align:center}
+
+    /* Radio embed */
+    .radio-embed{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+    .radio-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .radio-field{display:flex;flex-direction:column;gap:6px}
+    .radio-field label{font-size:.78rem;color:#9aa6b8;letter-spacing:.7px;text-transform:uppercase}
+    .radio-select{width:100%;padding:9px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,8,16,0.55);color:var(--light)}
+    .radio-select:focus{outline:2px solid rgba(92,225,230,0.35);outline-offset:1px}
+    .radio-player{width:100%;min-height:54px;border-radius:12px;background:#0b0f18}
+    .radio-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+    .radio-link{display:inline-block;padding:12px 22px;border-radius:999px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;text-decoration:none;font-weight:700;box-shadow:0 6px 18px rgba(138,92,245,0.24);border:0;cursor:pointer}
+    .radio-note{color:#9aa6b8;text-align:center;font-size:.9rem}
+
+    .footer{text-align:center;color:#8292a3;font-size:.9rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.03);margin-top:1.5rem}
+    body[data-focus='true'] #timeCard, body[data-focus='true'] #doodleCard{display:none}
+
+    /* small utilities */
+    .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+
+    /* Animations */
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    @keyframes cardIn{to{opacity:1;transform:none}}
+    @keyframes logoPulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+    /* Responsive */
+    @media(max-width:900px){.main-content{grid-template-columns:1fr}.container{padding:0.5rem}.subtitle{padding:0 1rem}}
+    @media(max-width:640px){.radio-filters{grid-template-columns:1fr}}
+
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <header>
+      <div class="logo">
+        <i class="fas fa-headphones logo-icon" aria-hidden></i>
+        <h1>Lo-Fi + Chill Radio</h1>
+      </div>
+      <p class="subtitle">Relax, focus, and switch between Lo-Fi, ambient and chill stations - with a clean player, doodles and a smarter Pomodoro.</p>
+
+      <div class="controls-row">
+        <button class="mini-btn" id="bgChangeBtn" title="Change background GIF">Change Background</button>
+        <button class="mini-btn" id="themeToggle" aria-pressed="false">Toggle Theme</button>
+        <button class="mini-btn" id="focusToggle" aria-pressed="false">Enable Focus Mode</button>
+        <button class="mini-btn" id="saveDoodle" title="Download drawing">Download Drawing</button>
+      </div>
+    </header>
+
+    <section class="main-content">
+      <!-- Radio Card -->
+      <article class="card" id="radioCard" style="animation-delay:.05s">
+        <div class="card-title"><i class="fas fa-broadcast-tower" aria-hidden></i><div>LoFi Radio</div></div>
+        <p style="color:#b6c2d0; margin-bottom:1rem">Pick genre and station, then tap play. Built for mobile and desktop.</p>
+        <div class="radio-embed">
+          <div class="radio-filters">
+            <div class="radio-field">
+              <label for="genreSelect">Genre</label>
+              <select id="genreSelect" class="radio-select" aria-label="Select radio genre"></select>
+            </div>
+            <div class="radio-field">
+              <label for="stationSelect">Station</label>
+              <select id="stationSelect" class="radio-select" aria-label="Select radio station"></select>
+            </div>
+          </div>
+          <audio id="lofiAudio" class="radio-player" controls preload="none" playsinline aria-label="LoFi radio player"></audio>
+          <div class="radio-actions">
+            <button class="radio-link" id="playLofi" type="button" aria-label="Play LoFi radio">
+              <i class="fas fa-play-circle" aria-hidden></i> Play LoFi
+            </button>
+            <button class="radio-link" id="nextStationBtn" type="button" aria-label="Switch to next station">
+              <i class="fas fa-forward" aria-hidden></i> Next Station
+            </button>
+          </div>
+          <div class="radio-actions">
+            <a class="radio-link" id="stationPageLink" href="https://somafm.com/groovesalad/" target="_blank" rel="noopener noreferrer" aria-label="Open selected station page in a new tab">
+              <i class="fas fa-external-link-alt" aria-hidden></i> Open Station Page
+            </a>
+          </div>
+          <p class="radio-note" id="radioStatus">Tap Play LoFi to start.</p>
+        </div>
+      </article>
+
+      <!-- Time Card -->
+      <article class="card" id="timeCard" style="animation-delay:.12s">
+        <div class="card-title"><i class="far fa-clock" aria-hidden></i><div>Current Time</div></div>
+        <div class="time-display" id="timeDisplay" aria-live="polite">00:00:00</div>
+        <div class="date-display" id="dateDisplay">-</div>
+      </article>
+
+      <!-- Doodle Board Card -->
+      <article class="card" id="doodleCard" style="animation-delay:.18s">
+        <div class="card-title"><i class="fas fa-pencil-alt" aria-hidden></i><div>Doodle Board</div></div>
+        <div class="doodle-canvas-wrap">
+          <canvas id="doodleCanvas" aria-label="Doodle canvas"></canvas>
+        </div>
+        <div class="doodle-controls">
+          <input class="color-picker" id="colorPicker" type="color" value="#5ce1e6" aria-label="Choose color">
+          <button class="doodle-btn" id="clearDoodle">Clear</button>
+          <button class="doodle-btn" id="thickLine">Thick</button>
+          <button class="doodle-btn" id="thinLine">Thin</button>
+        </div>
+      </article>
+
+      <!-- Pomodoro Card -->
+      <article class="card" id="pomodoroCard" style="animation-delay:.24s">
+        <div class="card-title"><i class="fas fa-hourglass-half" aria-hidden></i><div>Pomodoro Timer</div></div>
+        <div class="pomodoro-mode" id="pomodoroMode">Work Time</div>
+        <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
+
+        <div class="pomodoro-controls">
+          <button class="pomodoro-btn start-btn" id="pomodoroStart" aria-label="Start timer">Start</button>
+          <button class="pomodoro-btn pause-btn" id="pomodoroPause" aria-label="Pause timer" hidden>Pause</button>
+          <button class="pomodoro-btn reset-btn" id="pomodoroReset" aria-label="Reset timer">Reset</button>
+        </div>
+
+        <div class="pomodoro-settings">
+          <div class="setting"><label for="workMinutes">Work (min)</label><input id="workMinutes" type="number" min="1" max="60" value="25"></div>
+          <div class="setting"><label for="breakMinutes">Break (min)</label><input id="breakMinutes" type="number" min="1" max="60" value="5"></div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      <p>Made with <i class="fas fa-heart" style="color:var(--secondary)" aria-hidden></i> for Lo-Fi and chill lovers everywhere</p>
+      <p>&copy; <span id="copyrightYear"></span> Lo-Fi + Chill Radio. All rights reserved.</p>
+    </footer>
+
+  </div>
+
+  <script>
+    /* ================== Utilities & State ================== */
+    const gifs = [
+      'url(https://media1.giphy.com/media/IDfre6fw3xBcHCESQZ/giphy.gif)',
+      'url(https://media3.giphy.com/media/41Vg2MB3fOhrv49Vwz/giphy.gif)',
+      'url(https://media0.giphy.com/media/Fbox1ygIqnga5dLinz/giphy.gif)',
+      'url(https://media3.giphy.com/media/CW16nFVXLSQxSMUEMd/giphy.gif)',
+      'url(https://media0.giphy.com/media/dvreHY4p06lzVSDrvj/giphy.gif)',
+      'url(https://media4.giphy.com/media/LrGCXdMZYjwhQ95HIL/giphy.gif)'
+    ];
+
+    // Elements
+    const bgBtn = document.getElementById('bgChangeBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    const focusToggleBtn = document.getElementById('focusToggle');
+    const saveDoodleBtn = document.getElementById('saveDoodle');
+    const lofiAudio = document.getElementById('lofiAudio');
+    const playLofiBtn = document.getElementById('playLofi');
+    const nextStationBtn = document.getElementById('nextStationBtn');
+    const radioStatus = document.getElementById('radioStatus');
+    const genreSelect = document.getElementById('genreSelect');
+    const stationSelect = document.getElementById('stationSelect');
+    const stationPageLink = document.getElementById('stationPageLink');
+    const radioPrefsKey = 'lofiChillRadioPrefsV1';
+    const focusPrefsKey = 'lofiChillFocusModeV1';
+    let isFocusMode = false;
+
+    function loadFocusMode(){
+      try{
+        return localStorage.getItem(focusPrefsKey) === '1';
+      }catch(e){
+        return false;
+      }
+    }
+
+    function saveFocusMode(){
+      try{
+        localStorage.setItem(focusPrefsKey, isFocusMode ? '1' : '0');
+      }catch(e){}
+    }
+
+    function setFocusMode(enabled){
+      isFocusMode = Boolean(enabled);
+      document.body.setAttribute('data-focus', isFocusMode ? 'true' : 'false');
+      focusToggleBtn.setAttribute('aria-pressed', String(isFocusMode));
+      focusToggleBtn.textContent = isFocusMode ? 'Disable Focus Mode' : 'Enable Focus Mode';
+      saveDoodleBtn.classList.toggle('is-hidden', isFocusMode);
+    }
+
+    focusToggleBtn.addEventListener('click', ()=>{
+      setFocusMode(!isFocusMode);
+      saveFocusMode();
+    });
+
+    /* ----------------- Radio player ----------------- */
+    const stations = [
+      {
+        id: 'lofi-hiphop',
+        name: 'LoFi Hip Hop',
+        genre: 'lofi',
+        pageUrl: 'https://zeno.fm/radio/LofiHipHopStream/',
+        streams: [
+          'https://stream.zeno.fm/hqbrk7skwxhvv',
+          'https://play.streamafrica.net/lofiradio'
+        ]
+      },
+      {
+        id: 'sf1033',
+        name: 'SomaFM SF 10-33',
+        genre: 'lofi',
+        pageUrl: 'https://somafm.com/sf1033/',
+        streams: [
+          'https://ice4.somafm.com/sf1033-128-mp3',
+          'https://ice2.somafm.com/sf1033-128-mp3'
+        ]
+      },
+      {
+        id: 'groove-salad',
+        name: 'Groove Salad',
+        genre: 'downtempo',
+        pageUrl: 'https://somafm.com/groovesalad/',
+        streams: [
+          'https://ice6.somafm.com/groovesalad-128-mp3',
+          'https://ice2.somafm.com/groovesalad-128-mp3'
+        ]
+      },
+      {
+        id: 'groove-salad-classic',
+        name: 'Groove Salad Classic',
+        genre: 'ambient',
+        pageUrl: 'https://somafm.com/gsclassic/',
+        streams: [
+          'https://ice5.somafm.com/gsclassic-128-mp3',
+          'https://ice1.somafm.com/gsclassic-128-mp3'
+        ]
+      },
+      {
+        id: 'drone-zone',
+        name: 'Drone Zone',
+        genre: 'ambient',
+        pageUrl: 'https://somafm.com/dronezone/',
+        streams: [
+          'https://ice2.somafm.com/dronezone-128-mp3',
+          'https://ice4.somafm.com/dronezone-128-mp3'
+        ]
+      },
+      {
+        id: 'cliqhop-idm',
+        name: 'Cliqhop IDM',
+        genre: 'idm',
+        pageUrl: 'https://somafm.com/cliqhop/',
+        streams: [
+          'https://ice2.somafm.com/cliqhop-128-mp3',
+          'https://ice4.somafm.com/cliqhop-128-mp3'
+        ]
+      }
+    ];
+    const genreLabels = {
+      all: 'All Genres',
+      lofi: 'Lo-Fi',
+      ambient: 'Ambient',
+      downtempo: 'Downtempo',
+      idm: 'IDM / Beats'
+    };
+    let filteredStations = [];
+    let activeStation = null;
+    let radioStreamIndex = 0;
+    let currentPrefs = { genre: 'lofi', stationId: '' };
+
+    function loadRadioPrefs(){
+      try{
+        const raw = localStorage.getItem(radioPrefsKey);
+        if(!raw) return null;
+        const parsed = JSON.parse(raw);
+        if(!parsed || typeof parsed !== 'object') return null;
+        return parsed;
+      }catch(e){
+        return null;
+      }
+    }
+
+    function saveRadioPrefs(){
+      if(!activeStation) return;
+      currentPrefs = { genre: genreSelect.value, stationId: activeStation.id };
+      try{
+        localStorage.setItem(radioPrefsKey, JSON.stringify(currentPrefs));
+      }catch(e){}
+    }
+
+    function populateGenres(){
+      const genres = ['all', ...new Set(stations.map((station)=>station.genre))];
+      genreSelect.innerHTML = genres.map((genre)=>`<option value="${genre}">${genreLabels[genre] || genre}</option>`).join('');
+      genreSelect.value = genres.includes('lofi') ? 'lofi' : 'all';
+    }
+
+    function populateStationOptions(genre){
+      filteredStations = stations.filter((station)=> genre === 'all' || station.genre === genre);
+      stationSelect.innerHTML = filteredStations.map((station)=>`<option value="${station.id}">${station.name}</option>`).join('');
+    }
+
+    function setRadioStream(index){
+      if(!activeStation) return;
+      radioStreamIndex = index;
+      lofiAudio.src = activeStation.streams[radioStreamIndex];
+      radioStatus.textContent = `${activeStation.name}: stream ${radioStreamIndex + 1}/${activeStation.streams.length}.`;
+    }
+
+    function setActiveStation(stationId, keepPlaying=false){
+      const nextStation = stations.find((station)=>station.id === stationId);
+      if(!nextStation) return;
+      const shouldResume = keepPlaying && !lofiAudio.paused;
+      activeStation = nextStation;
+      stationSelect.value = activeStation.id;
+      stationPageLink.href = activeStation.pageUrl;
+      stationPageLink.setAttribute('aria-label', `Open ${activeStation.name} station page in a new tab`);
+      setRadioStream(0);
+      if(shouldResume){
+        playRadio();
+      }
+      playLofiBtn.innerHTML = `<i class="fas ${lofiAudio.paused ? 'fa-play-circle' : 'fa-pause-circle'}" aria-hidden></i> ${lofiAudio.paused ? 'Play LoFi' : 'Pause LoFi'}`;
+      saveRadioPrefs();
+    }
+
+    async function playRadio(){
+      try{
+        await lofiAudio.play();
+      }catch(e){
+        radioStatus.textContent = 'Playback blocked. Tap Play LoFi again.';
+      }
+    }
+
+    function goToNextStation(keepPlaying=false){
+      if(filteredStations.length === 0) return;
+      const currentIndex = filteredStations.findIndex((station)=>station.id === activeStation?.id);
+      const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % filteredStations.length : 0;
+      setActiveStation(filteredStations[nextIndex].id, keepPlaying);
+    }
+
+    function initRadioState(){
+      const saved = loadRadioPrefs();
+      const initialGenre = saved?.genre && genreLabels[saved.genre] ? saved.genre : 'lofi';
+      currentPrefs = { genre: initialGenre, stationId: saved?.stationId || '' };
+
+      populateGenres();
+      genreSelect.value = currentPrefs.genre;
+      populateStationOptions(genreSelect.value);
+
+      if(filteredStations.length === 0){
+        genreSelect.value = 'all';
+        populateStationOptions('all');
+      }
+
+      if(filteredStations.length > 0){
+        const hasSavedStation = filteredStations.some((station)=>station.id === currentPrefs.stationId);
+        setActiveStation(hasSavedStation ? currentPrefs.stationId : filteredStations[0].id);
+      }else{
+        radioStatus.textContent = 'No stations found.';
+      }
+    }
+
+    initRadioState();
+
+    genreSelect.addEventListener('change', ()=>{
+      const keepPlaying = !lofiAudio.paused;
+      populateStationOptions(genreSelect.value);
+      if(filteredStations.length > 0){
+        const preferred = filteredStations.find((station)=>station.id === currentPrefs.stationId);
+        setActiveStation((preferred || filteredStations[0]).id, keepPlaying);
+      }else{
+        activeStation = null;
+        lofiAudio.removeAttribute('src');
+        radioStatus.textContent = 'No stations found for this genre.';
+        currentPrefs = { genre: genreSelect.value, stationId: '' };
+        try{
+          localStorage.setItem(radioPrefsKey, JSON.stringify(currentPrefs));
+        }catch(e){}
+      }
+    });
+
+    stationSelect.addEventListener('change', ()=>{
+      setActiveStation(stationSelect.value, !lofiAudio.paused);
+    });
+
+    nextStationBtn.addEventListener('click', ()=>{
+      goToNextStation(!lofiAudio.paused);
+    });
+
+    playLofiBtn.addEventListener('click', async ()=>{
+      if(lofiAudio.paused){
+        await playRadio();
+      }else{
+        lofiAudio.pause();
+      }
+    });
+
+    lofiAudio.addEventListener('play', ()=>{
+      playLofiBtn.innerHTML = '<i class="fas fa-pause-circle" aria-hidden></i> Pause LoFi';
+      if(activeStation){
+        radioStatus.textContent = `Playing ${activeStation.name} (${genreLabels[activeStation.genre] || activeStation.genre}), stream ${radioStreamIndex + 1}/${activeStation.streams.length}.`;
+      }
+    });
+
+    lofiAudio.addEventListener('pause', ()=>{
+      playLofiBtn.innerHTML = '<i class="fas fa-play-circle" aria-hidden></i> Play LoFi';
+      if(lofiAudio.currentTime > 0){
+        radioStatus.textContent = 'Paused.';
+      }
+    });
+
+    lofiAudio.addEventListener('error', ()=>{
+      if(activeStation && radioStreamIndex < activeStation.streams.length - 1){
+        const shouldResume = !lofiAudio.paused;
+        setRadioStream(radioStreamIndex + 1);
+        radioStatus.textContent = `Stream failed, switching to ${radioStreamIndex + 1}/${activeStation.streams.length}...`;
+        if(shouldResume){
+          playRadio();
+        }
+      }else{
+        if(filteredStations.length > 1){
+          radioStatus.textContent = 'Station unavailable, moving to next station...';
+          goToNextStation(!lofiAudio.paused);
+        }else{
+          radioStatus.textContent = 'This station is unavailable on current network. Try another station or switch network/VPN.';
+        }
+      }
+    });
+
+    /* ----------------- Background change ----------------- */
+    function setRandomBackground(){
+      const url = gifs[Math.floor(Math.random()*gifs.length)];
+      document.body.style.backgroundImage = url;
+    }
+    bgBtn.addEventListener('click', setRandomBackground);
+
+    /* ----------------- Theme toggle ----------------- */
+    themeToggle.addEventListener('click', ()=>{
+      const root = document.documentElement;
+      const isWarm = root.getAttribute('data-theme') === 'warm';
+      root.setAttribute('data-theme', isWarm ? '' : 'warm');
+      themeToggle.setAttribute('aria-pressed', String(!isWarm));
+    });
+
+    /* ================ Clock ================ */
+    function updateClock(){
+      const now = new Date();
+      const timeEl = document.getElementById('timeDisplay');
+      const dateEl = document.getElementById('dateDisplay');
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ss = String(now.getSeconds()).padStart(2,'0');
+      timeEl.textContent = `${hh}:${mm}:${ss}`;
+      dateEl.textContent = now.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    }
+    updateClock(); setInterval(updateClock,1000);
+
+    /* ================ Doodle Canvas ================ */
+    const canvas = document.getElementById('doodleCanvas');
+    const ctx = canvas.getContext('2d', {alpha:true});
+    let drawing = false; let lineWidth = 3; let strokeColor = document.getElementById('colorPicker').value;
+
+    // retina friendly sizing helper
+    function resizeCanvas(){
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      // preserve content by drawing previous image onto temporary image
+      const dataUrl = canvas.toDataURL();
+
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      ctx.scale(dpr, dpr);
+
+      // restore
+      if(dataUrl){
+        const img = new Image();
+        img.onload = ()=>{ ctx.drawImage(img,0,0,rect.width,rect.height); };
+        img.src = dataUrl;
+      }
+
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = lineWidth; ctx.strokeStyle = strokeColor;
+    }
+
+    // initialize a sensible height
+    function setCanvasHeight(h=220){ canvas.style.height = h+'px'; resizeCanvas(); }
+    setCanvasHeight(220);
+    window.addEventListener('resize', ()=>{ resizeCanvas(); }, {passive:true});
+
+    // pointer helpers (mouse+touch unified using Pointer Events if available)
+    function getPointerPos(e){
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX ?? e.touches?.[0]?.clientX) - rect.left;
+      const y = (e.clientY ?? e.touches?.[0]?.clientY) - rect.top;
+      return {x,y};
+    }
+
+    // Use pointer events when available
+    canvas.addEventListener('pointerdown', (e)=>{ drawing=true; const p=getPointerPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); e.preventDefault(); });
+    canvas.addEventListener('pointermove', (e)=>{ if(!drawing) return; const p=getPointerPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+    canvas.addEventListener('pointerup', ()=>{ drawing=false; ctx.beginPath(); });
+    canvas.addEventListener('pointercancel', ()=>{ drawing=false; ctx.beginPath(); });
+
+    // controls
+    document.getElementById('colorPicker').addEventListener('input', (e)=>{ strokeColor = e.target.value; ctx.strokeStyle = strokeColor; });
+    document.getElementById('clearDoodle').addEventListener('click', ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); });
+    document.getElementById('thickLine').addEventListener('click', ()=>{ lineWidth = 6; ctx.lineWidth = lineWidth; });
+    document.getElementById('thinLine').addEventListener('click', ()=>{ lineWidth = 2; ctx.lineWidth = lineWidth; });
+
+    saveDoodleBtn.addEventListener('click', ()=>{
+      // download high-res PNG
+      const link = document.createElement('a');
+      link.download = `doodle-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    /* ================ Pomodoro ================ */
+    const pomodoroDisplay = document.getElementById('pomodoroDisplay');
+    const pomodoroMode = document.getElementById('pomodoroMode');
+    const startBtn = document.getElementById('pomodoroStart');
+    const pauseBtn = document.getElementById('pomodoroPause');
+    const resetBtn = document.getElementById('pomodoroReset');
+    const workInput = document.getElementById('workMinutes');
+    const breakInput = document.getElementById('breakMinutes');
+
+    let timerId = null, isRunning = false, isWork = true;
+    let timeLeft = parseInt(workInput.value,10)*60;
+
+    const alarmSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+    const countdownSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3');
+
+    function updatePomDisplay(){
+      const mm = String(Math.floor(timeLeft/60)).padStart(2,'0');
+      const ss = String(timeLeft%60).padStart(2,'0');
+      pomodoroDisplay.textContent = `${mm}:${ss}`;
+      pomodoroMode.textContent = isWork ? 'Work Time' : 'Break Time';
+      pomodoroMode.style.color = isWork ? 'var(--secondary)' : 'var(--accent)';
+    }
+
+    function playSound(sound, vol=0.5){ sound.currentTime=0; sound.volume=vol; sound.play().catch(()=>{}); }
+
+    function startPomodoro(){ if(isRunning) return; isRunning=true; startBtn.hidden=true; pauseBtn.hidden=false; timerId = setInterval(()=>{
+      timeLeft--; if(timeLeft===5) playSound(countdownSound,0.25);
+      if(timeLeft<=0){ clearInterval(timerId); playSound(alarmSound,0.6); // vibrate if supported
+        try{ navigator.vibrate?.([200,120,200]); }catch(e){}
+        // swap
+        isWork = !isWork; timeLeft = (isWork? parseInt(workInput.value,10): parseInt(breakInput.value,10))*60; updatePomDisplay(); // auto-start next after short pause
+        setTimeout(startPomodoro, 1000);
+      }
+      updatePomDisplay();
+    },1000); }
+
+    function pausePomodoro(){ if(!isRunning) return; clearInterval(timerId); isRunning=false; startBtn.hidden=false; pauseBtn.hidden=true; }
+    function resetPomodoro(){ pausePomodoro(); isWork=true; timeLeft = parseInt(workInput.value,10)*60; updatePomDisplay(); }
+
+    startBtn.addEventListener('click', startPomodoro); pauseBtn.addEventListener('click', pausePomodoro); resetBtn.addEventListener('click', resetPomodoro);
+
+    // keep display in sync with input change when not running
+    workInput.addEventListener('change', ()=>{ if(!isRunning && isWork){ timeLeft = parseInt(workInput.value,10)*60; updatePomDisplay(); }});
+    breakInput.addEventListener('change', ()=>{ if(!isRunning && !isWork){ timeLeft = parseInt(breakInput.value,10)*60; updatePomDisplay(); }});
+
+    // initialize
+    (function init(){ updatePomDisplay(); document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+      // set an initial background
+      setRandomBackground();
+      // restore focus mode state
+      setFocusMode(loadFocusMode());
+      // setup pointer events fallback for older browsers
+      ['touchstart','touchmove','touchend'].forEach(ev=>{ canvas.addEventListener(ev, (e)=>e.preventDefault(), {passive:false}); });
+    })();
+
+  </script>
+</body>
+</html>
