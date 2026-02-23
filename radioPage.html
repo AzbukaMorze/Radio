@@ -77,9 +77,9 @@
 
     /* Radio embed */
     .radio-embed{display:flex;flex-direction:column;gap:10px;margin-top:auto}
-    .radio-frame{width:100%;min-height:180px;border:0;border-radius:12px;background:#0b0f18}
+    .radio-player{width:100%;min-height:54px;border-radius:12px;background:#0b0f18}
     .radio-actions{display:flex;justify-content:center}
-    .radio-link{display:inline-block;padding:12px 22px;border-radius:999px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;text-decoration:none;font-weight:700;box-shadow:0 6px 18px rgba(138,92,245,0.24)}
+    .radio-link{display:inline-block;padding:12px 22px;border-radius:999px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;text-decoration:none;font-weight:700;box-shadow:0 6px 18px rgba(138,92,245,0.24);border:0;cursor:pointer}
     .radio-note{color:#9aa6b8;text-align:center;font-size:.9rem}
 
     .footer{text-align:center;color:#8292a3;font-size:.9rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.03);margin-top:1.5rem}
@@ -119,20 +119,18 @@
         <div class="card-title"><i class="fas fa-broadcast-tower" aria-hidden></i><div>LoFi Radio</div></div>
         <p style="color:#b6c2d0; margin-bottom:1rem">Play a curated Lo-Fi stream with minimal UI so you can focus.</p>
         <div class="radio-embed">
-          <iframe
-            class="radio-frame"
-            title="LoFi Radio"
-            src="https://radiopotok.ru/lofiradio"
-            loading="lazy"
-            allow="autoplay"
-            referrerpolicy="strict-origin-when-cross-origin">
-          </iframe>
+          <audio id="lofiAudio" class="radio-player" controls preload="none" playsinline aria-label="LoFi radio player"></audio>
           <div class="radio-actions">
-            <a class="radio-link" href="https://radiopotok.ru/lofiradio" target="_blank" rel="noopener noreferrer" aria-label="Open LoFi Radio stream in a new tab">
-              <i class="fas fa-play-circle" aria-hidden></i> Open in New Tab
+            <button class="radio-link" id="playLofi" type="button" aria-label="Play LoFi radio">
+              <i class="fas fa-play-circle" aria-hidden></i> Play LoFi
+            </button>
+          </div>
+          <div class="radio-actions">
+            <a class="radio-link" href="https://somafm.com/groovesalad/" target="_blank" rel="noopener noreferrer" aria-label="Open LoFi station page in a new tab">
+              <i class="fas fa-external-link-alt" aria-hidden></i> Open Station Page
             </a>
           </div>
-          <p class="radio-note">If embedded playback is blocked, open the stream in a new tab.</p>
+          <p class="radio-note" id="radioStatus">Tap Play LoFi to start.</p>
         </div>
       </article>
 
@@ -198,6 +196,64 @@
     const bgBtn = document.getElementById('bgChangeBtn');
     const themeToggle = document.getElementById('themeToggle');
     const saveDoodleBtn = document.getElementById('saveDoodle');
+    const lofiAudio = document.getElementById('lofiAudio');
+    const playLofiBtn = document.getElementById('playLofi');
+    const radioStatus = document.getElementById('radioStatus');
+
+    /* ----------------- Radio player ----------------- */
+    const radioStreams = [
+      'https://ice1.somafm.com/groovesalad-128-mp3',
+      'https://ice2.somafm.com/groovesalad-128-mp3'
+    ];
+    let radioStreamIndex = 0;
+
+    function setRadioStream(index){
+      radioStreamIndex = index;
+      lofiAudio.src = radioStreams[radioStreamIndex];
+      radioStatus.textContent = `Using stream ${radioStreamIndex + 1}/${radioStreams.length}.`;
+    }
+
+    async function playRadio(){
+      try{
+        await lofiAudio.play();
+      }catch(e){
+        radioStatus.textContent = 'Playback blocked. Tap Play LoFi again.';
+      }
+    }
+
+    playLofiBtn.addEventListener('click', async ()=>{
+      if(lofiAudio.paused){
+        await playRadio();
+      }else{
+        lofiAudio.pause();
+      }
+    });
+
+    lofiAudio.addEventListener('play', ()=>{
+      playLofiBtn.innerHTML = '<i class="fas fa-pause-circle" aria-hidden></i> Pause LoFi';
+      radioStatus.textContent = `Playing stream ${radioStreamIndex + 1}/${radioStreams.length}.`;
+    });
+
+    lofiAudio.addEventListener('pause', ()=>{
+      playLofiBtn.innerHTML = '<i class="fas fa-play-circle" aria-hidden></i> Play LoFi';
+      if(lofiAudio.currentTime > 0){
+        radioStatus.textContent = 'Paused.';
+      }
+    });
+
+    lofiAudio.addEventListener('error', ()=>{
+      if(radioStreamIndex < radioStreams.length - 1){
+        const shouldResume = !lofiAudio.paused;
+        setRadioStream(radioStreamIndex + 1);
+        radioStatus.textContent = `Stream failed, switching to ${radioStreamIndex + 1}/${radioStreams.length}...`;
+        if(shouldResume){
+          playRadio();
+        }
+      }else{
+        radioStatus.textContent = 'All streams failed. Try opening station page or switching network/VPN.';
+      }
+    });
+    setRadioStream(0);
 
     /* ----------------- Background change ----------------- */
     function setRandomBackground(){
